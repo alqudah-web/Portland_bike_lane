@@ -1,0 +1,27 @@
+{
+  "total_tracts": 169,
+  "tracts_with_bikes": 165,
+  "tracts_without_bikes": 4,
+  "total_active_miles": 627.7,
+  "mean_density": 6.36,
+  "max_density": 45.41,
+  "corr_white": -0.096,
+  "corr_income": -0.309,
+  "mean_pct_white": 69.2,
+  "mean_median_income": 97553.0,
+  "county_median_income": 88766,
+  "income_quintiles": {
+    "Q1 (Lowest)": 8.86,
+    "Q2": 8.11,
+    "Q3": 5.47,
+    "Q4": 5.73,
+    "Q5 (Highest)": 4.4
+  },
+  "white_quintiles": {
+    "Q1 (Lowest)": 6.68,
+    "Q2": 8.04,
+    "Q3": 7.25,
+    "Q4": 5.89,
+    "Q5 (Highest)": 4.68
+  }
+}

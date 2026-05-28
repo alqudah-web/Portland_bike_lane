@@ -1,0 +1,14 @@
+# Source data files (not needed for the deployed website)
+census_tracts_or.zip
+Bicycle_Network/
+City_Boundaries/
+2026 race data/
+race - ACSDT5Y2024/
+income - ACSDT5Y2024/
+
+# Processing script & notebook (keep these local)
+process_data.py
+process_data.ipynb
+
+# macOS
+.DS_Store
