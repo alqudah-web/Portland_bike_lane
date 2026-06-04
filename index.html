@@ -887,16 +887,61 @@
 
   // ─── Init ──────────────────────────────────────────────────
   async function init() {
+    if (typeof L === 'undefined' || typeof Chart === 'undefined') {
+      console.error('External libraries failed to load. L:', typeof L, 'Chart:', typeof Chart);
+      document.getElementById('loading-overlay').innerHTML =
+        '<div style="color: #f43f5e; font-size: 1.1rem; text-align: center; padding: 2rem; font-family: sans-serif;">' +
+        '⚠️ Failed to load external libraries (Leaflet or Chart.js).<br>' +
+        '<small style="color: #94a3b8; display: block; margin-top: 0.5rem;">' +
+        'Please check your internet connection and ensure CDNs (unpkg.com, jsdelivr.net) are not blocked.' +
+        '</small></div>';
+      return;
+    }
+
     const loaded = await loadData();
     if (!loaded) return;
 
-    populateStats();
-    initMap();
-    setupMapControls();
-    createCharts();
-    populateInsights();
-    populateEquitySection();
-    setupScrollAnimations();
+    try {
+      populateStats();
+    } catch (e) {
+      console.error('Error populating stats:', e);
+    }
+
+    try {
+      initMap();
+    } catch (e) {
+      console.error('Error initializing map:', e);
+    }
+
+    try {
+      setupMapControls();
+    } catch (e) {
+      console.error('Error setting up map controls:', e);
+    }
+
+    try {
+      createCharts();
+    } catch (e) {
+      console.error('Error creating charts:', e);
+    }
+
+    try {
+      populateInsights();
+    } catch (e) {
+      console.error('Error populating insights:', e);
+    }
+
+    try {
+      populateEquitySection();
+    } catch (e) {
+      console.error('Error populating equity section:', e);
+    }
+
+    try {
+      setupScrollAnimations();
+    } catch (e) {
+      console.error('Error setting up scroll animations:', e);
+    }
 
     // Hide loading overlay
     setTimeout(() => {

@@ -5,10 +5,15 @@ City_Boundaries/
 2026 race data/
 race - ACSDT5Y2024/
 income - ACSDT5Y2024/
+New Race data/
+new race data/
 
 # Processing script & notebook (keep these local)
 process_data.py
 process_data.ipynb
+
+# Environment / secrets
+.env
 
 # macOS
 .DS_Store
