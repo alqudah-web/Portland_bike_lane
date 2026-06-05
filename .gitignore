@@ -1,12 +1,9 @@
 # Source data files (not needed for the deployed website)
-census_tracts_or.zip
-Bicycle_Network/
-City_Boundaries/
-2026 race data/
-race - ACSDT5Y2024/
-income - ACSDT5Y2024/
-New Race data/
-new race data/
+data/Bicycle_Network/
+data/City_Boundaries/
+data/New Race data/
+data/income - ACSDT5Y2024/
+data/census_tracts_or.zip
 
 # Processing script & notebook (keep these local)
 process_data.py

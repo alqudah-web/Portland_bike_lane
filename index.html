@@ -314,10 +314,10 @@
   async function loadData() {
     try {
       const [tractsResp, bikesResp, plannedResp, summaryResp] = await Promise.all([
-        fetch('data_tracts.geojson').then(r => r.json()),
-        fetch('data_bikes_active.geojson').then(r => r.json()),
-        fetch('data_bikes_planned.geojson').then(r => r.json()),
-        fetch('data_summary.json').then(r => r.json())
+        fetch('data/data_tracts.geojson').then(r => r.json()),
+        fetch('data/data_bikes_active.geojson').then(r => r.json()),
+        fetch('data/data_bikes_planned.geojson').then(r => r.json()),
+        fetch('data/data_summary.json').then(r => r.json())
       ]);
       tractsData = tractsResp;
       bikesActiveData = bikesResp;
