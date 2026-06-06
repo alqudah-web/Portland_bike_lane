@@ -168,6 +168,21 @@
           <canvas id="chart-bar-white"></canvas>
         </div>
       </div>
+
+      <div class="glass-card">
+        <div class="glass-card__header">
+          <h2 class="glass-card__title">
+            <span class="glass-card__title-icon">📊</span>
+            Extremes: Most Diverse vs. Whitest Tracts
+          </h2>
+        </div>
+        <p class="glass-card__description">
+          Average bike lane density in the 5 tracts with the lowest % White population compared to the 5 tracts with the highest % White population.
+        </p>
+        <div class="chart-wrapper">
+          <canvas id="chart-bar-extremes"></canvas>
+        </div>
+      </div>
     </div>
 
     <!-- ═══ KEY INSIGHTS ═══ -->
@@ -770,6 +785,75 @@
               }
             }
           });
+        }
+
+        // ─── Bar: Most Diverse vs Whitest ───────────────────────
+        if (tractsData && tractsData.features) {
+          // Filter tracts that have valid pct_white and bike_density
+          let validTracts = tractsData.features.filter(f => 
+            f.properties.pct_white != null && 
+            !isNaN(f.properties.pct_white) &&
+            f.properties.bike_density != null &&
+            !isNaN(f.properties.bike_density)
+          );
+          
+          // Sort by pct_white ascending
+          validTracts.sort((a, b) => a.properties.pct_white - b.properties.pct_white);
+          
+          if (validTracts.length >= 10) {
+            const bottom5 = validTracts.slice(0, 5);
+            const top5 = validTracts.slice(-5);
+            
+            const avgBottom = bottom5.reduce((sum, f) => sum + f.properties.bike_density, 0) / 5;
+            const avgTop = top5.reduce((sum, f) => sum + f.properties.bike_density, 0) / 5;
+            
+            new Chart(document.getElementById('chart-bar-extremes'), {
+              type: 'bar',
+              data: {
+                labels: ['Most Diverse Tracts (Bottom 5% White)', 'Whitest Tracts (Top 5% White)'],
+                datasets: [{
+                  label: 'Avg Bike Density (mi/sq mi)',
+                  data: [avgBottom, avgTop],
+                  backgroundColor: [
+                    'rgba(244, 63, 94, 0.7)',
+                    'rgba(14, 165, 233, 0.7)'
+                  ],
+                  borderColor: [
+                    '#f43f5e',
+                    '#0ea5e9'
+                  ],
+                  borderWidth: 1,
+                  borderRadius: 6
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: { display: false },
+                  tooltip: {
+                    backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                    titleColor: '#14b8a6',
+                    bodyColor: '#e2e8f0',
+                    borderColor: 'rgba(255,255,255,0.1)',
+                    borderWidth: 1,
+                    padding: 12
+                  }
+                },
+                scales: {
+                  x: {
+                    grid: { display: false },
+                    ticks: { font: { size: 12 } }
+                  },
+                  y: {
+                    title: { display: true, text: 'Avg Bike Density (mi/sq mi)', color: '#94a3b8', font: { weight: 600 } },
+                    grid: { color: 'rgba(255,255,255,0.04)' },
+                    beginAtZero: true
+                  }
+                }
+              }
+            });
+          }
         }
       }
 
