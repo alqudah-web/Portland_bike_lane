@@ -83,6 +83,7 @@
         <button class="map-btn" data-layer="pct_white" id="btn-pct-white">👤 % White</button>
         <button class="map-btn" data-layer="pct_nonwhite" id="btn-pct-nonwhite">👥 % Non-White</button>
         <button class="map-btn" data-layer="income" id="btn-income">💰 Median Income</button>
+        <button class="map-btn" data-layer="nocoverage" id="btn-nocoverage">🚫 No Coverage</button>
       </div>
 
       <!-- Overlay toggles -->
@@ -288,6 +289,13 @@
           labels: ['$0', '$40k', '$60k', '$80k', '$100k', '$140k', '$200k+'],
           title: 'Median Household Income',
           format: v => '$' + (v / 1000).toFixed(0) + 'k'
+        },
+        nocoverage: {
+          colors: ['#1e293b', '#ef4444'], // 0 = Has bikes (dark), 1 = No bikes (red)
+          breaks: [0, 1],
+          labels: ['Has Bike Lanes', 'Zero Bike Lanes'],
+          title: 'Bike Lane Coverage',
+          format: v => v === 1 ? 'Zero Coverage' : 'Covered'
         }
       };
 
@@ -306,6 +314,7 @@
           case 'pct_white': return props.pct_white || 0;
           case 'pct_nonwhite': return props.pct_nonwhite || 0;
           case 'income': return props.median_income || 0;
+          case 'nocoverage': return props.nocoverage || 0;
           default: return 0;
         }
       }
