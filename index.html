@@ -537,10 +537,43 @@
           !isNaN(f.properties.median_income)
         );
 
+        // Identify Top 3 and Bottom 3 Outliers (by bike density, resolving ties by population)
+        const sortedFeatures = [...features].sort((a, b) => b.properties.bike_density - a.properties.bike_density || b.properties.total_pop - a.properties.total_pop);
+        const outlierNames = new Set([
+          ...sortedFeatures.slice(0, 3).map(f => f.properties.NAMELSAD),
+          ...sortedFeatures.slice(-3).map(f => f.properties.NAMELSAD)
+        ]);
+
+        const outlierPlugin = {
+          id: 'outlierLabels',
+          afterDatasetsDraw(chart) {
+            const ctx = chart.ctx;
+            const dataset = chart.data.datasets[0];
+            const meta = chart.getDatasetMeta(0);
+            
+            ctx.fillStyle = '#e2e8f0';
+            ctx.font = '500 11px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'bottom';
+            
+            dataset.data.forEach((point, index) => {
+              if (point.isOutlier) {
+                const { x, y } = meta.data[index].tooltipPosition();
+                ctx.shadowColor = 'rgba(0,0,0,0.8)';
+                ctx.shadowBlur = 4;
+                ctx.fillText(point.name, x, y - 6);
+                ctx.shadowBlur = 0;
+              }
+            });
+          }
+        };
+
         // ─── Scatter: Density vs % White ─────────────────────
         const scatterWhiteData = features.map(f => ({
           x: f.properties.pct_white,
-          y: f.properties.bike_density
+          y: f.properties.bike_density,
+          name: f.properties.NAMELSAD || 'Unknown Tract',
+          isOutlier: outlierNames.has(f.properties.NAMELSAD)
         }));
 
         // Compute trendline
@@ -572,6 +605,7 @@
               }
             ]
           },
+          plugins: [outlierPlugin],
           options: {
             responsive: true,
             maintainAspectRatio: false,
@@ -585,7 +619,7 @@
                 borderWidth: 1,
                 padding: 12,
                 callbacks: {
-                  label: ctx => `${ctx.parsed.x.toFixed(1)}% White → ${ctx.parsed.y.toFixed(2)} mi/sq mi`
+                  label: ctx => `${ctx.raw.name}: ${ctx.parsed.x.toFixed(1)}% White → ${ctx.parsed.y.toFixed(2)} mi/sq mi`
                 }
               }
             },
@@ -608,7 +642,9 @@
           .filter(f => f.properties.median_income > 0)
           .map(f => ({
             x: f.properties.median_income / 1000,
-            y: f.properties.bike_density
+            y: f.properties.bike_density,
+            name: f.properties.NAMELSAD || 'Unknown Tract',
+            isOutlier: outlierNames.has(f.properties.NAMELSAD)
           }));
 
         const trendIncome = computeTrendline(scatterIncomeData);
@@ -639,6 +675,7 @@
               }
             ]
           },
+          plugins: [outlierPlugin],
           options: {
             responsive: true,
             maintainAspectRatio: false,
@@ -652,7 +689,7 @@
                 borderWidth: 1,
                 padding: 12,
                 callbacks: {
-                  label: ctx => `$${ctx.parsed.x.toFixed(0)}k income → ${ctx.parsed.y.toFixed(2)} mi/sq mi`
+                  label: ctx => `${ctx.raw.name}: $${ctx.parsed.x.toFixed(0)}k income → ${ctx.parsed.y.toFixed(2)} mi/sq mi`
                 }
               }
             },
