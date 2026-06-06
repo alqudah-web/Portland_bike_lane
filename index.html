@@ -91,7 +91,8 @@
         <span
           style="color: var(--text-muted); font-size: 0.82rem; font-weight: 500; margin-right: 0.25rem; align-self: center;">Overlays:</span>
         <button class="toggle-btn active" id="toggle-bikes-active">🟢 Active Bike Lanes</button>
-        <button class="toggle-btn" id="toggle-bikes-planned">🟡 Planned / Recommended</button>
+        <button class="toggle-btn" id="toggle-bikes-planned">🟡 Planned</button>
+        <button class="toggle-btn" id="toggle-bikes-recomm">🟠 Recommended</button>
       </div>
 
       <div id="map-container"></div>
@@ -269,11 +270,12 @@
       'use strict';
 
       // ─── State ─────────────────────────────────────────────────
-      let map, tractsLayer, bikesActiveLayer, bikesPlannedLayer;
-      let tractsData, bikesActiveData, bikesPlannedData, summaryData;
+      let map, tractsLayer, bikesActiveLayer, bikesPlannedLayer, bikesRecommLayer;
+      let tractsData, bikesActiveData, bikesPlannedData, bikesRecommData, summaryData;
       let currentChoropleth = 'density';
       let showBikesActive = true;
       let showBikesPlanned = false;
+      let showBikesRecomm = false;
 
       // ─── Color Scales ──────────────────────────────────────────
       const colorScales = {
@@ -347,15 +349,17 @@
       // ─── Data Loading ──────────────────────────────────────────
       async function loadData() {
         try {
-          const [tractsResp, bikesResp, plannedResp, summaryResp] = await Promise.all([
+          const [tractsResp, bikesResp, plannedResp, recommResp, summaryResp] = await Promise.all([
             fetch('data/data_tracts.geojson').then(r => r.json()),
             fetch('data/data_bikes_active.geojson').then(r => r.json()),
             fetch('data/data_bikes_planned.geojson').then(r => r.json()),
+            fetch('data/data_bikes_recomm.geojson').then(r => r.json()),
             fetch('data/data_summary.json').then(r => r.json())
           ]);
           tractsData = tractsResp;
           bikesActiveData = bikesResp;
           bikesPlannedData = plannedResp;
+          bikesRecommData = recommResp;
           summaryData = summaryResp;
           return true;
         } catch (err) {
@@ -519,6 +523,13 @@
           this.classList.toggle('active');
           if (showBikesPlanned) bikesPlannedLayer.addTo(map);
           else map.removeLayer(bikesPlannedLayer);
+        });
+
+        document.getElementById('toggle-bikes-recomm').addEventListener('click', function () {
+          showBikesRecomm = !showBikesRecomm;
+          this.classList.toggle('active');
+          if (showBikesRecomm && bikesRecommLayer) bikesRecommLayer.addTo(map);
+          else if (bikesRecommLayer) map.removeLayer(bikesRecommLayer);
         });
       }
 
