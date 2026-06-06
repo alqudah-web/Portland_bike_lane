@@ -224,7 +224,7 @@
           <h3 class="footer-section__title">Methodology</h3>
           <p class="footer-section__text">
             Bike lane density = total active bike lane miles ÷ tract area (sq mi).
-            Spatial join assigns each bike segment to intersecting census tract(s).
+            Bike segments are clipped to tract boundaries using a spatial overlay in UTM projection; lane length is measured from the clipped geometry to avoid double-counting segments that cross tract lines.
             All facility types (BL, PBL, BBL, TRL, etc.) weighted equally.
             Race categories follow OMB single-race-alone definitions; Hispanic is an overlapping ethnicity.
           </p>
