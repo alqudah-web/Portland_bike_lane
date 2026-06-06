@@ -476,13 +476,21 @@
         });
         if (showBikesActive) bikesActiveLayer.addTo(map);
 
-        // Planned/Recommended bike lanes
+        // Planned bike lanes
         bikesPlannedLayer = L.geoJSON(bikesPlannedData, {
           style: function () {
-            return { color: '#f59e0b', weight: 1.5, opacity: 0.5, dashArray: '5,5' };
+            return { color: '#fcd34d', weight: 1.5, opacity: 0.5, dashArray: '5,5' }; // Yellow
           }
         });
         if (showBikesPlanned) bikesPlannedLayer.addTo(map);
+
+        // Recommended bike lanes
+        if (bikesRecommData && bikesRecommData.features) {
+          bikesRecommLayer = L.geoJSON(bikesRecommData, {
+            style: { color: '#f59e0b', weight: 2, opacity: 0.7, dashArray: '3,4' } // Amber/Orange
+          });
+          if (showBikesRecomm) bikesRecommLayer.addTo(map);
+        }
       }
 
       // ─── Legend ────────────────────────────────────────────────
