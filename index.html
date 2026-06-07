@@ -44,6 +44,10 @@
         <div class="stat-card__label">Active Bike Lane Miles</div>
       </div>
       <div class="stat-card">
+        <div class="stat-card__value stat-card__value--blue" id="stat-protected-miles">—</div>
+        <div class="stat-card__label">Protected Bike Miles</div>
+      </div>
+      <div class="stat-card">
         <div class="stat-card__value stat-card__value--amber" id="stat-tracts">—</div>
         <div class="stat-card__label">Census Tracts Analyzed</div>
       </div>
@@ -80,6 +84,8 @@
           style="color: var(--text-muted); font-size: 0.82rem; font-weight: 500; margin-right: 0.25rem; align-self: center;">Filter
           by:</span>
         <button class="map-btn active" data-layer="density" id="btn-density">🚲 Bike Density</button>
+        <button class="map-btn" data-layer="protected_density" id="btn-protected-density">🛡️ Protected Bike
+          Density</button>
         <button class="map-btn" data-layer="pct_white" id="btn-pct-white">👤 % White</button>
         <button class="map-btn" data-layer="pct_nonwhite" id="btn-pct-nonwhite">👥 % Non-White</button>
         <button class="map-btn" data-layer="income" id="btn-income">💰 Median Income</button>
@@ -178,7 +184,8 @@
           </h2>
         </div>
         <p class="glass-card__description">
-          Average bike lane density in the 5 tracts with the lowest % White population compared to the 5 tracts with the highest % White population.
+          Average bike lane density in the 5 tracts with the lowest % White population compared to the 5 tracts with the
+          highest % White population.
         </p>
         <div class="chart-wrapper">
           <canvas id="chart-bar-extremes"></canvas>
@@ -230,17 +237,26 @@
         <div class="footer-section">
           <h3 class="footer-section__title">Data Sources</h3>
           <p class="footer-section__text">
-            <strong>Bike Network:</strong> <a href="https://gis-pdx.opendata.arcgis.com/datasets/PDX::bicycle-network/about" target="_blank">Portland Open Data — Bicycle Network</a><br>
-            <strong>Race Data:</strong> <a href="https://data.census.gov/table/ACSDT5Y2024.B02001?t=Race+and+Ethnicity&g=050XX00US41051$1400000&y=2024&moe=false" target="_blank">ACS 5-Year Estimates 2024, Table B02001</a><br>
-            <strong>Income Data:</strong> <a href="https://data.census.gov/table?q=Income+and+Poverty&t=Income+and+Poverty&g=050XX00US41051,41051$1400000" target="_blank">ACS 5-Year Estimates 2024, Table B19013</a><br>
-            <strong>City Boundaries:</strong> <a href="https://gis-pdx.opendata.arcgis.com/datasets/PDX::city-boundaries/explore?location=45.596300%2C-122.863750%2C9" target="_blank">Portland Open Data — City Boundaries</a>
+            <strong>Bike Network:</strong> <a
+              href="https://gis-pdx.opendata.arcgis.com/datasets/PDX::bicycle-network/about" target="_blank">Portland
+              Open Data — Bicycle Network</a><br>
+            <strong>Race Data:</strong> <a
+              href="https://data.census.gov/table/ACSDT5Y2024.B02001?t=Race+and+Ethnicity&g=050XX00US41051$1400000&y=2024&moe=false"
+              target="_blank">ACS 5-Year Estimates 2024, Table B02001</a><br>
+            <strong>Income Data:</strong> <a
+              href="https://data.census.gov/table?q=Income+and+Poverty&t=Income+and+Poverty&g=050XX00US41051,41051$1400000"
+              target="_blank">ACS 5-Year Estimates 2024, Table B19013</a><br>
+            <strong>City Boundaries:</strong> <a
+              href="https://gis-pdx.opendata.arcgis.com/datasets/PDX::city-boundaries/explore?location=45.596300%2C-122.863750%2C9"
+              target="_blank">Portland Open Data — City Boundaries</a>
           </p>
         </div>
         <div class="footer-section">
           <h3 class="footer-section__title">Methodology</h3>
           <p class="footer-section__text">
             Bike lane density = total active bike lane miles ÷ tract area (sq mi).
-            Bike segments are clipped to tract boundaries using a spatial overlay in UTM projection; lane length is measured from the clipped geometry to avoid double-counting segments that cross tract lines.
+            Bike segments are clipped to tract boundaries using a spatial overlay in UTM projection; lane length is
+            measured from the clipped geometry to avoid double-counting segments that cross tract lines.
             All facility types (BL, PBL, BBL, TRL, etc.) weighted equally.
             Race categories follow OMB single-race-alone definitions; Hispanic is an overlapping ethnicity.
           </p>
@@ -286,6 +302,13 @@
           title: 'Bike Density (mi/sq mi)',
           format: v => v.toFixed(1)
         },
+        protected_density: {
+          colors: ['#0d1b2a', '#1e2030', '#1f385c', '#1d5570', '#0ea5e9', '#38bdf8', '#bae6fd'],
+          breaks: [0, 0.2, 0.5, 1.0, 2.0, 3.5, 5.0],
+          labels: ['0', '0.2', '0.5', '1.0', '2.0', '3.5', '5.0+'],
+          title: 'Protected Bike Density (mi/sq mi)',
+          format: v => v.toFixed(1)
+        },
         pct_white: {
           colors: ['#1e1b4b', '#312e81', '#4338ca', '#6366f1', '#818cf8', '#a5b4fc', '#e0e7ff'],
           breaks: [0, 30, 45, 60, 70, 80, 90],
@@ -328,6 +351,7 @@
       function getPropertyValue(props, layer) {
         switch (layer) {
           case 'density': return props.bike_density || 0;
+          case 'protected_density': return props.protected_bike_density || 0;
           case 'pct_white': return props.pct_white || 0;
           case 'pct_nonwhite': return props.pct_nonwhite || 0;
           case 'income': return props.median_income || 0;
@@ -374,6 +398,7 @@
       // ─── Populate Stats ────────────────────────────────────────
       function populateStats() {
         document.getElementById('stat-miles').textContent = summaryData.total_active_miles.toFixed(0);
+        document.getElementById('stat-protected-miles').textContent = (summaryData.total_protected_miles || 0).toFixed(0);
         document.getElementById('stat-tracts').textContent = summaryData.total_tracts;
         document.getElementById('stat-corr-income').textContent = summaryData.corr_income.toFixed(3);
         document.getElementById('stat-corr-white').textContent = summaryData.corr_white.toFixed(3);
@@ -426,7 +451,9 @@
             const popup = `
           <div class="popup-tract-name">${p.NAMELSAD || 'Unknown Tract'}</div>
           <div class="popup-row"><span class="popup-label">Bike Density</span><span class="popup-value">${(p.bike_density || 0).toFixed(2)} mi/sq mi</span></div>
-          <div class="popup-row"><span class="popup-label">Total Bike Miles</span><span class="popup-value">${(p.total_bike_miles || 0).toFixed(2)}</span></div>
+          <div class="popup-row"><span class="popup-label">Total Bike Miles</span><span class="popup-value">${(p.total_bike_miles || 0).toFixed(2)} mi</span></div>
+          <div class="popup-row"><span class="popup-label">Protected Density</span><span class="popup-value">${(p.protected_bike_density || 0).toFixed(2)} mi/sq mi</span></div>
+          <div class="popup-row"><span class="popup-label">Protected Miles</span><span class="popup-value">${(p.protected_bike_miles || 0).toFixed(2)} mi</span></div>
           <div class="popup-row"><span class="popup-label">Tract Area</span><span class="popup-value">${(p.area_sqmi || 0).toFixed(2)} sq mi</span></div>
           <hr style="border:none; border-top:1px solid rgba(255,255,255,0.1); margin:6px 0;">
           <div class="popup-row"><span class="popup-label">Population</span><span class="popup-value">${formatNumber(p.total_pop)}</span></div>
@@ -809,23 +836,23 @@
         // ─── Bar: Most Diverse vs Whitest ───────────────────────
         if (tractsData && tractsData.features) {
           // Filter tracts that have valid pct_white and bike_density
-          let validTracts = tractsData.features.filter(f => 
-            f.properties.pct_white != null && 
+          let validTracts = tractsData.features.filter(f =>
+            f.properties.pct_white != null &&
             !isNaN(f.properties.pct_white) &&
             f.properties.bike_density != null &&
             !isNaN(f.properties.bike_density)
           );
-          
+
           // Sort by pct_white ascending
           validTracts.sort((a, b) => a.properties.pct_white - b.properties.pct_white);
-          
+
           if (validTracts.length >= 10) {
             const bottom5 = validTracts.slice(0, 5);
             const top5 = validTracts.slice(-5);
-            
+
             const avgBottom = bottom5.reduce((sum, f) => sum + f.properties.bike_density, 0) / 5;
             const avgTop = top5.reduce((sum, f) => sum + f.properties.bike_density, 0) / 5;
-            
+
             new Chart(document.getElementById('chart-bar-extremes'), {
               type: 'bar',
               data: {

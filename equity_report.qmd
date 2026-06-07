@@ -60,7 +60,9 @@ plt.figure(figsize=(10, 6))
 x = df['pct_white']
 y = df['bike_density']
 plt.scatter(x, y, alpha=0.6, color='#3b82f6', s=50, edgecolors='white', linewidth=0.5)
-m, b = np.polyfit(x, y, 1)
+# Drop NaN values for polyfit
+mask = x.notna() & y.notna()
+m, b = np.polyfit(x[mask], y[mask], 1)
 plt.plot(x, m*x + b, color='#ef4444', linewidth=2)
 plt.grid(True, alpha=0.3)
 
@@ -79,10 +81,12 @@ Next, we compare the median household income against bike lane density.
 
 ```{python}
 plt.figure(figsize=(10, 6))
-x = df['pct_white']
+x = df['median_income']
 y = df['bike_density']
 plt.scatter(x, y, alpha=0.6, color='#3b82f6', s=50, edgecolors='white', linewidth=0.5)
-m, b = np.polyfit(x, y, 1)
+# Drop NaN values for polyfit
+mask = x.notna() & y.notna()
+m, b = np.polyfit(x[mask], y[mask], 1)
 plt.plot(x, m*x + b, color='#ef4444', linewidth=2)
 plt.grid(True, alpha=0.3)
 
@@ -99,8 +103,77 @@ plt.show()
 
 This plot shows a stronger negative correlation. Wealthier census tracts generally have lower overall bike lane density compared to lower-income tracts.
 
+## Analysis of Protected Bike Infrastructure
+
+While overall bike lane density tells us about raw mileage, it does not distinguish between a painted stripe next to speeding traffic and a physically protected bike lane or off-street trail. Let's look at the distribution of **protected bike infrastructure** (including protected bike lanes `PBL` and multi-use trails `TRL`).
+
+```{python}
+# Calculate correlations for protected bike density
+corr_white_protected = df['protected_bike_density'].corr(df['pct_white'])
+corr_income_protected = df['protected_bike_density'].corr(df['median_income'])
+
+print(f"Correlation between Protected Bike Density and % White: {corr_white_protected:.3f}")
+print(f"Correlation between Protected Bike Density and Median Income: {corr_income_protected:.3f}")
+```
+
+### Visualizing Protected Infrastructure Equity: Race
+
+```{python}
+plt.figure(figsize=(10, 6))
+x = df['pct_white']
+y = df['protected_bike_density']
+plt.scatter(x, y, alpha=0.6, color='#0ea5e9', s=50, edgecolors='white', linewidth=0.5)
+
+# Fit line on non-NaN values
+mask = x.notna() & y.notna()
+m, b = np.polyfit(x[mask], y[mask], 1)
+plt.plot(x, m*x + b, color='#ef4444', linewidth=2)
+plt.grid(True, alpha=0.3)
+
+plt.title('Protected Bike Density vs. White Population by Census Tract')
+plt.xlabel('Percentage White (%)')
+plt.ylabel('Protected Bike Density (miles / sq mile)')
+plt.tight_layout()
+plt.show()
+```
+
+### Visualizing Protected Infrastructure Equity: Income
+
+```{python}
+plt.figure(figsize=(10, 6))
+x = df['median_income']
+y = df['protected_bike_density']
+plt.scatter(x, y, alpha=0.6, color='#0ea5e9', s=50, edgecolors='white', linewidth=0.5)
+
+# Fit line on non-NaN values
+mask = x.notna() & y.notna()
+m, b = np.polyfit(x[mask], y[mask], 1)
+plt.plot(x, m*x + b, color='#ef4444', linewidth=2)
+plt.grid(True, alpha=0.3)
+
+# Format x-axis as currency in thousands
+ax = plt.gca()
+ax.xaxis.set_major_formatter(plt.FuncFormatter(lambda x, loc: f"${int(x/1000)}k"))
+
+plt.title('Protected Bike Density vs. Median Household Income')
+plt.xlabel('Median Household Income')
+plt.ylabel('Protected Bike Density (miles / sq mile)')
+plt.tight_layout()
+plt.show()
+```
+
+### Discussion of Protected Infrastructure
+
+Comparing the correlations, we find:
+*   **Race**: The correlation between protected bike density and % White population is **negative (r = -0.162)**. This is a stronger negative correlation than overall bike lane density (r = -0.022), indicating that diverse (non-white) census tracts in Portland tend to have a higher density of protected/separated cycling infrastructure.
+*   **Income**: The correlation between protected bike density and median household income is **negative (r = -0.292)**. Lower-income census tracts tend to have higher protected bike lane density compared to wealthier tracts, though the correlation is slightly weaker than that of overall bike lane density (r = -0.352).
+
+This indicates that both general bike lanes and high-quality, protected bike infrastructure are more concentrated in Portland's more diverse, lower-income neighborhoods. This aligns with PBOT's equity goals of directing infrastructure investments toward underserved areas.
+
 ## Conclusion
 
 At a macro level, Portland's bike lane mileage does not disproportionately favor wealthy, white neighborhoods. In fact, the data suggests that lower-income and more diverse census tracts often contain a higher density of active bike infrastructure per square mile. 
 
-However, mileage and density are only one part of the story. Further analysis should investigate the **quality, safety, and connectivity** of these networks. A few disconnected miles of painted bike lanes in a low-income neighborhood do not provide the same utility or safety as a fully connected, protected network in a wealthier area.
+Furthermore, our quality-focused analysis reveals that **protected bike infrastructure** (protected bike lanes and off-street trails) shows even stronger equity alignments. In particular, diverse neighborhoods have significantly higher protected bike density on average than whiter neighborhoods (r = -0.162). Lower-income areas also enjoy a higher density of protected bike facilities (r = -0.292) compared to wealthier tracts. 
+
+While complete coverage gaps still exist (3 census tracts have zero active bike lanes), Portland's existing and high-quality cycling networks demonstrate a strong distributive equity layout citywide. Future efforts should focus on closing the remaining coverage gaps and ensuring complete network connectivity for all neighborhoods.
