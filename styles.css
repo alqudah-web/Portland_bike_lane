@@ -690,3 +690,4 @@ body::before {
   .stats-row { grid-template-columns: 1fr; }
   .map-controls { flex-direction: column; }
 }
+

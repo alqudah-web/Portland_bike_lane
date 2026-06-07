@@ -1,0 +1,106 @@
+---
+title: "Portland Bike Lane Equity Analysis"
+author: "Mohammed Al Qudah"
+date: today
+format:
+  html:
+    toc: true
+    code-fold: true
+    theme: cosmo
+execute:
+  warning: false
+  message: false
+---
+
+## Introduction
+
+This report analyzes whether Portland's active bike infrastructure is equitably distributed across census tracts, cross-referencing bike network data from the Portland Bureau of Transportation (PBOT) with race and income demographics from the 2024 American Community Survey (ACS).
+
+The purpose of this analysis is to provide empirical data to transportation equity advocates.
+
+## Setup and Data Loading
+
+We load the pre-processed GeoJSON dataset, which contains census tracts clipped to the Portland city boundary, intersected with the bike network to calculate accurate per-square-mile bike lane density.
+
+```{python}
+import geopandas as gpd
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+
+
+# Load the processed dataset
+tracts = gpd.read_file('data/data_tracts.geojson')
+
+# Filter out tracts with missing demographic data
+df = tracts[(tracts['total_pop'] > 0) & (tracts['median_income'] > 0)].copy()
+
+print(f"Loaded {len(df)} populated census tracts in Portland.")
+```
+
+## Summary Statistics
+
+Let's look at the correlation between our key variables.
+
+```{python}
+# Calculate correlations
+corr_white = df['bike_density'].corr(df['pct_white'])
+corr_income = df['bike_density'].corr(df['median_income'])
+
+print(f"Correlation between Bike Density and % White: {corr_white:.3f}")
+print(f"Correlation between Bike Density and Median Income: {corr_income:.3f}")
+```
+
+## Visualizing Equity: Race
+
+The scatter plot below compares the percentage of white residents in a census tract against the density of bike lanes (miles of bike lane per square mile).
+
+```{python}
+plt.figure(figsize=(10, 6))
+x = df['pct_white']
+y = df['bike_density']
+plt.scatter(x, y, alpha=0.6, color='#3b82f6', s=50, edgecolors='white', linewidth=0.5)
+m, b = np.polyfit(x, y, 1)
+plt.plot(x, m*x + b, color='#ef4444', linewidth=2)
+plt.grid(True, alpha=0.3)
+
+plt.title('Bike Lane Density vs. White Population by Census Tract')
+plt.xlabel('Percentage White (%)')
+plt.ylabel('Bike Density (miles / sq mile)')
+plt.tight_layout()
+plt.show()
+```
+
+The correlation is slightly negative, indicating that more diverse (non-white) tracts actually tend to have slightly higher bike lane density on average.
+
+## Visualizing Equity: Income
+
+Next, we compare the median household income against bike lane density.
+
+```{python}
+plt.figure(figsize=(10, 6))
+x = df['pct_white']
+y = df['bike_density']
+plt.scatter(x, y, alpha=0.6, color='#3b82f6', s=50, edgecolors='white', linewidth=0.5)
+m, b = np.polyfit(x, y, 1)
+plt.plot(x, m*x + b, color='#ef4444', linewidth=2)
+plt.grid(True, alpha=0.3)
+
+# Format x-axis as currency in thousands
+ax = plt.gca()
+ax.xaxis.set_major_formatter(plt.FuncFormatter(lambda x, loc: f"${int(x/1000)}k"))
+
+plt.title('Bike Lane Density vs. Median Household Income')
+plt.xlabel('Median Household Income')
+plt.ylabel('Bike Density (miles / sq mile)')
+plt.tight_layout()
+plt.show()
+```
+
+This plot shows a stronger negative correlation. Wealthier census tracts generally have lower overall bike lane density compared to lower-income tracts.
+
+## Conclusion
+
+At a macro level, Portland's bike lane mileage does not disproportionately favor wealthy, white neighborhoods. In fact, the data suggests that lower-income and more diverse census tracts often contain a higher density of active bike infrastructure per square mile. 
+
+However, mileage and density are only one part of the story. Further analysis should investigate the **quality, safety, and connectivity** of these networks. A few disconnected miles of painted bike lanes in a low-income neighborhood do not provide the same utility or safety as a fully connected, protected network in a wealthier area.
