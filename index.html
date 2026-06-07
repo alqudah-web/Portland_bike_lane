@@ -97,6 +97,7 @@
         <span
           style="color: var(--text-muted); font-size: 0.82rem; font-weight: 500; margin-right: 0.25rem; align-self: center;">Overlays:</span>
         <button class="toggle-btn active" id="toggle-bikes-active">🟢 Active Bike Lanes</button>
+        <button class="toggle-btn" id="toggle-bikes-protected">🔵 Protected Bike Lanes</button>
         <button class="toggle-btn" id="toggle-bikes-planned">🟡 Planned</button>
         <button class="toggle-btn" id="toggle-bikes-recomm">🟠 Recommended</button>
       </div>
@@ -286,10 +287,11 @@
       'use strict';
 
       // ─── State ─────────────────────────────────────────────────
-      let map, tractsLayer, bikesActiveLayer, bikesPlannedLayer, bikesRecommLayer;
+      let map, tractsLayer, bikesActiveLayer, bikesProtectedLayer, bikesPlannedLayer, bikesRecommLayer;
       let tractsData, bikesActiveData, bikesPlannedData, bikesRecommData, summaryData;
       let currentChoropleth = 'density';
       let showBikesActive = true;
+      let showBikesProtected = false;
       let showBikesPlanned = false;
       let showBikesRecomm = false;
 
@@ -503,6 +505,29 @@
         });
         if (showBikesActive) bikesActiveLayer.addTo(map);
 
+        // Protected active bike lanes (filter to PBL and TRL)
+        bikesProtectedLayer = L.geoJSON(bikesActiveData, {
+          filter: function (feature) {
+            const facility = feature.properties.Facility;
+            return facility === 'PBL' || facility === 'TRL';
+          },
+          style: function (feature) {
+            const facility = feature.properties.Facility;
+            let color = '#3b82f6'; // Bright blue
+            let weight = 2.5;
+            if (facility === 'TRL') { color = '#06b6d4'; } // Cyan for trail
+            return { color, weight, opacity: 0.85 };
+          },
+          onEachFeature: function (feature, layer) {
+            const p = feature.properties;
+            layer.bindTooltip(`<strong>${p.SegmentNam || ''}</strong><br>${p.Facility} (Protected) · ${(p.LengthMile || 0).toFixed(2)} mi`, {
+              sticky: true,
+              className: 'bike-tooltip'
+            });
+          }
+        });
+        if (showBikesProtected) bikesProtectedLayer.addTo(map);
+
         // Planned bike lanes
         bikesPlannedLayer = L.geoJSON(bikesPlannedData, {
           style: function () {
@@ -565,6 +590,13 @@
           this.classList.toggle('active');
           if (showBikesRecomm && bikesRecommLayer) bikesRecommLayer.addTo(map);
           else if (bikesRecommLayer) map.removeLayer(bikesRecommLayer);
+        });
+
+        document.getElementById('toggle-bikes-protected').addEventListener('click', function () {
+          showBikesProtected = !showBikesProtected;
+          this.classList.toggle('active');
+          if (showBikesProtected) bikesProtectedLayer.addTo(map);
+          else map.removeLayer(bikesProtectedLayer);
         });
       }
 
