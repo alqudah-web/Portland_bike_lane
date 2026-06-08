@@ -87,7 +87,6 @@
         <button class="map-btn" data-layer="protected_density" id="btn-protected-density">🛡️ Protected Bike
           Density</button>
         <button class="map-btn" data-layer="pct_white" id="btn-pct-white">👤 % White</button>
-        <button class="map-btn" data-layer="pct_nonwhite" id="btn-pct-nonwhite">👥 % Non-White</button>
         <button class="map-btn" data-layer="income" id="btn-income">💰 Median Income</button>
         <button class="map-btn" data-layer="nocoverage" id="btn-nocoverage">🚫 No Coverage</button>
       </div>
@@ -318,13 +317,6 @@
           title: '% White Population',
           format: v => v.toFixed(0) + '%'
         },
-        pct_nonwhite: {
-          colors: ['#1a1a2e', '#2d1f3d', '#4a1942', '#6b2149', '#d63384', '#f472b6', '#fce7f3'],
-          breaks: [0, 10, 20, 30, 40, 55, 70],
-          labels: ['0%', '10%', '20%', '30%', '40%', '55%', '70%+'],
-          title: '% Non-White Population',
-          format: v => v.toFixed(0) + '%'
-        },
         income: {
           colors: ['#1a1a0e', '#3d2e0a', '#78350f', '#b45309', '#f59e0b', '#fbbf24', '#fef3c7'],
           breaks: [0, 40000, 60000, 80000, 100000, 140000, 200000],
@@ -352,13 +344,12 @@
 
       function getPropertyValue(props, layer) {
         switch (layer) {
-          case 'density': return props.bike_density || 0;
-          case 'protected_density': return props.protected_bike_density || 0;
-          case 'pct_white': return props.pct_white || 0;
-          case 'pct_nonwhite': return props.pct_nonwhite || 0;
-          case 'income': return props.median_income || 0;
-          case 'nocoverage': return props.nocoverage || 0;
-          default: return 0;
+          case 'density': return props.bike_density;
+          case 'protected_density': return props.protected_bike_density;
+          case 'pct_white': return props.pct_white;
+          case 'income': return props.median_income;
+          case 'nocoverage': return props.nocoverage;
+          default: return null;
         }
       }
 
@@ -370,6 +361,31 @@
       function formatCurrency(n) {
         if (n == null || isNaN(n)) return '—';
         return '$' + n.toLocaleString('en-US');
+      }
+
+      function formatDensity(n) {
+        if (n == null || isNaN(n)) return '—';
+        return n.toFixed(2) + ' mi/sq mi';
+      }
+
+      function formatMiles(n) {
+        if (n == null || isNaN(n)) return '—';
+        return n.toFixed(2) + ' mi';
+      }
+
+      function formatArea(n) {
+        if (n == null || isNaN(n)) return '—';
+        return n.toFixed(2) + ' sq mi';
+      }
+
+      function formatPercent(n) {
+        if (n == null || isNaN(n)) return '—';
+        return n.toFixed(1) + '%';
+      }
+
+      function formatFloat(n, decimals) {
+        if (n == null || isNaN(n)) return '—';
+        return n.toFixed(decimals);
       }
 
       // ─── Data Loading ──────────────────────────────────────────
@@ -436,10 +452,19 @@
       function updateChoropleth() {
         if (tractsLayer) map.removeLayer(tractsLayer);
 
-        const scale = colorScales[currentChoropleth];
+        const isActive = currentChoropleth !== 'none';
+        const scale = isActive ? colorScales[currentChoropleth] : null;
 
         tractsLayer = L.geoJSON(tractsData, {
           style: function (feature) {
+            if (!isActive) {
+              return {
+                fillColor: '#3b82f6',
+                fillOpacity: 0.05,
+                color: 'rgba(59, 130, 246, 0.18)',
+                weight: 1
+              };
+            }
             const val = getPropertyValue(feature.properties, currentChoropleth);
             return {
               fillColor: getColor(val, scale),
@@ -452,25 +477,29 @@
             const p = feature.properties;
             const popup = `
           <div class="popup-tract-name">${p.NAMELSAD || 'Unknown Tract'}</div>
-          <div class="popup-row"><span class="popup-label">Bike Density</span><span class="popup-value">${(p.bike_density || 0).toFixed(2)} mi/sq mi</span></div>
-          <div class="popup-row"><span class="popup-label">Total Bike Miles</span><span class="popup-value">${(p.total_bike_miles || 0).toFixed(2)} mi</span></div>
-          <div class="popup-row"><span class="popup-label">Protected Density</span><span class="popup-value">${(p.protected_bike_density || 0).toFixed(2)} mi/sq mi</span></div>
-          <div class="popup-row"><span class="popup-label">Protected Miles</span><span class="popup-value">${(p.protected_bike_miles || 0).toFixed(2)} mi</span></div>
-          <div class="popup-row"><span class="popup-label">Tract Area</span><span class="popup-value">${(p.area_sqmi || 0).toFixed(2)} sq mi</span></div>
+          <div class="popup-row"><span class="popup-label">Bike Density</span><span class="popup-value">${formatDensity(p.bike_density)}</span></div>
+          <div class="popup-row"><span class="popup-label">Total Bike Miles</span><span class="popup-value">${formatMiles(p.total_bike_miles)}</span></div>
+          <div class="popup-row"><span class="popup-label">Protected Density</span><span class="popup-value">${formatDensity(p.protected_bike_density)}</span></div>
+          <div class="popup-row"><span class="popup-label">Protected Miles</span><span class="popup-value">${formatMiles(p.protected_bike_miles)}</span></div>
+          <div class="popup-row"><span class="popup-label">Tract Area</span><span class="popup-value">${formatArea(p.area_sqmi)}</span></div>
           <hr style="border:none; border-top:1px solid rgba(255,255,255,0.1); margin:6px 0;">
           <div class="popup-row"><span class="popup-label">Population</span><span class="popup-value">${formatNumber(p.total_pop)}</span></div>
-          <div class="popup-row"><span class="popup-label">% White</span><span class="popup-value">${(p.pct_white || 0).toFixed(1)}%</span></div>
-          <div class="popup-row"><span class="popup-label">% Non-White</span><span class="popup-value">${(p.pct_nonwhite || 0).toFixed(1)}%</span></div>
-          <div class="popup-row"><span class="popup-label">% Black</span><span class="popup-value">${(p.pct_black || 0).toFixed(1)}%</span></div>
-          <div class="popup-row"><span class="popup-label">% Asian</span><span class="popup-value">${(p.pct_asian || 0).toFixed(1)}%</span></div>
-          <div class="popup-row"><span class="popup-label">% Hispanic</span><span class="popup-value">${(p.pct_hispanic || 0).toFixed(1)}%</span></div>
+          <div class="popup-row"><span class="popup-label">% White</span><span class="popup-value">${formatPercent(p.pct_white)}</span></div>
+          <div class="popup-row"><span class="popup-label">% Black</span><span class="popup-value">${formatPercent(p.pct_black)}</span></div>
+          <div class="popup-row"><span class="popup-label">% Asian</span><span class="popup-value">${formatPercent(p.pct_asian)}</span></div>
+          <div class="popup-row"><span class="popup-label">% Hispanic</span><span class="popup-value">${formatPercent(p.pct_hispanic)}</span></div>
           <hr style="border:none; border-top:1px solid rgba(255,255,255,0.1); margin:6px 0;">
           <div class="popup-row"><span class="popup-label">Median Income</span><span class="popup-value">${formatCurrency(p.median_income)}</span></div>
         `;
             layer.bindPopup(popup, { maxWidth: 280 });
 
             layer.on('mouseover', function () {
-              this.setStyle({ weight: 2.5, color: '#14b8a6', fillOpacity: 0.9 });
+              this.setStyle({
+                weight: 2.5,
+                color: '#14b8a6',
+                fillOpacity: isActive ? 0.9 : 0.15,
+                fillColor: isActive ? undefined : '#14b8a6'
+              });
               this.bringToFront();
             });
             layer.on('mouseout', function () {
@@ -545,9 +574,12 @@
         }
       }
 
-      // ─── Legend ────────────────────────────────────────────────
       function updateLegend() {
         const legend = document.getElementById('map-legend');
+        if (currentChoropleth === 'none') {
+          legend.innerHTML = '<span style="color: var(--text-muted); font-style: italic;">No demographic filter active. Outline shows Portland census tracts.</span>';
+          return;
+        }
         const scale = colorScales[currentChoropleth];
         let html = `<span style="font-weight:600; margin-right:0.5rem;">${scale.title}:</span>`;
         for (let i = 0; i < scale.colors.length; i++) {
@@ -557,14 +589,19 @@
         legend.innerHTML = html;
       }
 
-      // ─── Map Controls ──────────────────────────────────────────
       function setupMapControls() {
         // Choropleth buttons
         document.querySelectorAll('#choropleth-controls .map-btn').forEach(btn => {
           btn.addEventListener('click', function () {
+            const wasActive = this.classList.contains('active');
             document.querySelectorAll('#choropleth-controls .map-btn').forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-            currentChoropleth = this.dataset.layer;
+
+            if (wasActive) {
+              currentChoropleth = 'none';
+            } else {
+              this.classList.add('active');
+              currentChoropleth = this.dataset.layer;
+            }
             updateChoropleth();
             updateLegend();
           });
@@ -964,8 +1001,8 @@
             Math.abs(corrIncome) < 0.5 ? 'moderate' : 'strong';
         document.getElementById('insight-income-text').innerHTML =
           `There is a <strong>${incomeStrength} ${incomeDir}</strong> correlation between bike lane density and median household income. ` +
-          `Lower-income tracts average <strong>${summaryData.income_quintiles?.['Q1 (Lowest)']?.toFixed(1) || '—'} mi/sq mi</strong> ` +
-          `compared to <strong>${summaryData.income_quintiles?.['Q5 (Highest)']?.toFixed(1) || '—'} mi/sq mi</strong> in the wealthiest tracts.`;
+          `Lower-income tracts average <strong>${formatFloat(summaryData.income_quintiles?.['Q1 (Lowest)'], 1)} mi/sq mi</strong> ` +
+          `compared to <strong>${formatFloat(summaryData.income_quintiles?.['Q5 (Highest)'], 1)} mi/sq mi</strong> in the wealthiest tracts.`;
 
         // Race insight
         document.getElementById('insight-race-corr').textContent = `r = ${corrWhite.toFixed(3)}`;
@@ -975,8 +1012,8 @@
             Math.abs(corrWhite) < 0.5 ? 'moderate' : 'strong';
         document.getElementById('insight-race-text').innerHTML =
           `There is a <strong>${raceStrength} ${raceDir}</strong> correlation between bike lane density and the % White population. ` +
-          `The least-White quintile averages <strong>${summaryData.white_quintiles?.['Q1 (Lowest)']?.toFixed(1) || '—'} mi/sq mi</strong> ` +
-          `vs. <strong>${summaryData.white_quintiles?.['Q5 (Highest)']?.toFixed(1) || '—'} mi/sq mi</strong> in the whitest tracts.`;
+          `The least-White quintile averages <strong>${formatFloat(summaryData.white_quintiles?.['Q1 (Lowest)'], 1)} mi/sq mi</strong> ` +
+          `vs. <strong>${formatFloat(summaryData.white_quintiles?.['Q5 (Highest)'], 1)} mi/sq mi</strong> in the whitest tracts.`;
 
         // Coverage gap insight
         document.getElementById('insight-gap-stat').textContent = `${summaryData.tracts_without_bikes} tracts`;
@@ -1000,8 +1037,8 @@
             `<span class="equity-highlight equity-highlight--positive">negative correlation (r = ${corrIncome.toFixed(3)})</span> ` +
             `with median household income. Lower-income census tracts tend to have <strong>higher</strong> bike lane density ` +
             `than wealthier neighborhoods. The lowest-income quintile averages ` +
-            `<strong>${summaryData.income_quintiles?.['Q1 (Lowest)']?.toFixed(1)} mi/sq mi</strong>, roughly double the ` +
-            `<strong>${summaryData.income_quintiles?.['Q5 (Highest)']?.toFixed(1)} mi/sq mi</strong> seen in the highest-income quintile.</p>`;
+            `<strong>${formatFloat(summaryData.income_quintiles?.['Q1 (Lowest)'], 1)} mi/sq mi</strong>, roughly double the ` +
+            `<strong>${formatFloat(summaryData.income_quintiles?.['Q5 (Highest)'], 1)} mi/sq mi</strong> seen in the highest-income quintile.</p>`;
         } else if (corrIncome > 0.15) {
           narrative += `<p class="equity-section__text">` +
             `The data reveals that bike lane infrastructure is ` +
