@@ -52,14 +52,6 @@
         <div class="stat-card__label">Census Tracts Analyzed</div>
       </div>
       <div class="stat-card">
-        <div class="stat-card__value stat-card__value--blue" id="stat-corr-income">—</div>
-        <div class="stat-card__label">Density–Income Correlation</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-card__value stat-card__value--purple" id="stat-corr-white">—</div>
-        <div class="stat-card__label">Density–Diversity Correlation</div>
-      </div>
-      <div class="stat-card">
         <div class="stat-card__value stat-card__value--rose" id="stat-no-bike">—</div>
         <div class="stat-card__label">Tracts with No Bike Lanes</div>
       </div>
@@ -449,8 +441,6 @@
         document.getElementById('stat-miles').textContent = summaryData.total_active_miles.toFixed(0);
         document.getElementById('stat-protected-miles').textContent = (summaryData.total_protected_miles || 0).toFixed(0);
         document.getElementById('stat-tracts').textContent = summaryData.total_tracts;
-        document.getElementById('stat-corr-income').textContent = summaryData.corr_income.toFixed(3);
-        document.getElementById('stat-corr-white').textContent = summaryData.corr_diversity.toFixed(3);
         document.getElementById('stat-no-bike').textContent = summaryData.tracts_without_bikes;
       }
 
