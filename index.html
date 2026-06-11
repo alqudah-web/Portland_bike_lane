@@ -227,28 +227,28 @@
     <div class="insights-grid animate-on-scroll" id="insights-section">
       <div class="insight-card insight-card--teal">
         <div class="insight-card__icon">🔍</div>
-        <div class="insight-card__title">Income–Density Finding</div>
-        <div class="insight-card__stat insight-card__stat--teal" id="insight-income-corr">—</div>
+        <div class="insight-card__title">Income-Density Finding</div>
+        <div class="insight-card__stat insight-card__stat--teal" id="insight-income-corr">r = -0.352</div>
         <div class="insight-card__text" id="insight-income-text">
-          Loading analysis...
+          There is a moderate negative correlation between bike lane density and median household income. Lower-income tracts average 6.4 mi/sq mi compared to 3.5 mi/sq mi in the wealthiest tracts. The pattern holds for protected lanes too as the lowest income quintile averages 1.94 mi/sq mi compared to just 0.37 in the highest.
         </div>
       </div>
 
       <div class="insight-card insight-card--amber">
         <div class="insight-card__icon">👥</div>
-        <div class="insight-card__title">Race–Density Finding</div>
-        <div class="insight-card__stat insight-card__stat--amber" id="insight-race-corr">—</div>
+        <div class="insight-card__title">Race-Diversity Finding</div>
+        <div class="insight-card__stat insight-card__stat--amber" id="insight-race-corr">r = -0.020</div>
         <div class="insight-card__text" id="insight-race-text">
-          Loading analysis...
+          There is a very weak correlation between overall bike lane density and neighborhood diversity. However protected lanes tell a different story becuase the most diverse quintile averages 1.26 mi/sq mi compared to 0.47 in the least diverse quintile, roughly 3x more.
         </div>
       </div>
 
       <div class="insight-card insight-card--rose">
         <div class="insight-card__icon">⚠️</div>
         <div class="insight-card__title">Coverage Gaps</div>
-        <div class="insight-card__stat insight-card__stat--rose" id="insight-gap-stat">—</div>
+        <div class="insight-card__stat insight-card__stat--rose" id="insight-gap-stat">3 tracts</div>
         <div class="insight-card__text" id="insight-gap-text">
-          Loading analysis...
+          3 out of 169 census tracts have zero active bike infrastructure. These gaps raise important equity questions about which communities lack safe cycling access entirely.
         </div>
       </div>
     </div>
@@ -1106,37 +1106,7 @@
 
       // ─── Populate Insights ─────────────────────────────────────
       function populateInsights() {
-        const corrIncome = summaryData.corr_income;
-        const corrWhite = summaryData.corr_diversity;
-
-        // Income insight
-        document.getElementById('insight-income-corr').textContent = `r = ${corrIncome.toFixed(3)}`;
-        const incomeDir = corrIncome < 0 ? 'negative' : 'positive';
-        const incomeStrength = Math.abs(corrIncome) < 0.1 ? 'very weak' :
-          Math.abs(corrIncome) < 0.3 ? 'weak' :
-            Math.abs(corrIncome) < 0.5 ? 'moderate' : 'strong';
-        document.getElementById('insight-income-text').innerHTML =
-          `There is a <strong>${incomeStrength} ${incomeDir}</strong> correlation between bike lane density and median household income. ` +
-          `Lower-income tracts average <strong>${formatFloat(summaryData.income_quintiles?.['Q1 (Lowest)'], 1)} mi/sq mi</strong> ` +
-          `compared to <strong>${formatFloat(summaryData.income_quintiles?.['Q5 (Highest)'], 1)} mi/sq mi</strong> in the wealthiest tracts.`;
-
-        // Race insight
-        document.getElementById('insight-race-corr').textContent = `r = ${corrWhite.toFixed(3)}`;
-        const raceDir = corrWhite < 0 ? 'negative' : 'positive';
-        const raceStrength = Math.abs(corrWhite) < 0.1 ? 'very weak' :
-          Math.abs(corrWhite) < 0.3 ? 'weak' :
-            Math.abs(corrWhite) < 0.5 ? 'moderate' : 'strong';
-        document.getElementById('insight-race-text').innerHTML =
-          `There is a <strong>${raceStrength} ${raceDir}</strong> correlation between bike lane density and neighborhood diversity. ` +
-          `The most diverse quintile averages <strong>${formatFloat(summaryData.diversity_quintiles?.['Q1 (Lowest)'], 1)} mi/sq mi</strong> ` +
-          `vs. <strong>${formatFloat(summaryData.diversity_quintiles?.['Q5 (Highest)'], 1)} mi/sq mi</strong> in the least diverse tracts.`;
-
-        // Coverage gap insight
-        document.getElementById('insight-gap-stat').textContent = `${summaryData.tracts_without_bikes} tracts`;
-        document.getElementById('insight-gap-text').innerHTML =
-          `<strong>${summaryData.tracts_without_bikes} out of ${summaryData.total_tracts}</strong> census tracts have ` +
-          `<strong>zero active bike infrastructure</strong>. These gaps are critical to understanding which communities ` +
-          `lack safe cycling access entirely.`;
+        // Text is hardcoded in HTML, so no JS population needed for insights
       }
 
       // ─── Populate Equity Section ───────────────────────────────
