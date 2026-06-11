@@ -257,7 +257,12 @@
     <section class="equity-section animate-on-scroll" id="equity-section">
       <h2 class="equity-section__title">⚖️ Equity Analysis & Policy Implications</h2>
       <div id="equity-content">
-        <p class="equity-section__text">Loading analysis...</p>
+        <p class="equity-section__text">Portland's bike infrastructure is denser in lower-income and more diverse neighborhoods, but that doesn't mean the city has solved cycling equity.</p>
+        <p class="equity-section__text">The income pattern is largely explained by urban form because Portland's bike network is concentrated in the central city. Dense, walkable neighborhoods close to downtown on both sides of the river tend to be lower-income relative to outer neighborhoods like the West Hills or outer East Portland, which are wealthier but more spread out and car-dependent. Density runs high in the central city by geography, not necessarily by intentional equity investment.</p>
+        <p class="equity-section__text">Higher density does not equal better access. A few disconnected lanes in a lower-income neighborhood don't provide the same benefit as a well-connected network that gets people to jobs, transit, and services.</p>
+        <p class="equity-section__text">Protected lanes reveal a clearer equity signal. When we isolate infrastructure that actually keeps cyclists safe through physical separation from cars, the most diverse tracts have nearly 3x more protected infrastructure than the least diverse tracts. That gap matters for cyclist safety.</p>
+        <p class="equity-section__text">The real equity question is network reach. The central city is relatively well connected, but the outer neighborhoods and suburbs surrounding it have far less infrastructure. That gap means cycling is only truly accessible to people who already live close to downtown. For Portland to deliver on its equity commitments, the bike network needs to extend outward so that all residents, regardless of income, can realistically use a bike to reach parks, jobs, transit, and services.</p>
+        <p class="equity-section__text">These findings connect directly to Portland's Vision Zero goals and PBOT's stated equity commitments around prioritizing investment in underserved communities.</p>
       </div>
     </section>
 
@@ -284,19 +289,13 @@
         <div class="footer-section">
           <h3 class="footer-section__title">Methodology</h3>
           <p class="footer-section__text">
-            Bike lane density = total active bike lane miles ÷ tract area (sq mi).
-            Bike segments are clipped to tract boundaries using a spatial overlay in UTM projection; lane length is
-            measured from the clipped geometry to avoid double-counting segments that cross tract lines.
-            All facility types (BL, PBL, BBL, TRL, etc.) weighted equally.
-            Race categories follow OMB single-race-alone definitions; Hispanic is an overlapping ethnicity.
+            Bike lane density = total active bike lane miles / tract area (sq mi). Bike segments are clipped to tract boundaries using gpd.overlay() in UTM Zone 10N. Lane length is measured from the clipped geometry to avoid double-counting segments that cross tract boundaries. Only active facilities are included. Protected lanes are filtered to PBL and TRL facility types only. Tract area is calculated using the Portland-clipped portion of each tract.
           </p>
         </div>
         <div class="footer-section">
           <h3 class="footer-section__title">Context</h3>
           <p class="footer-section__text">
-            This analysis connects to Portland's <strong>Vision Zero</strong> goals and the
-            <strong>Portland Bureau of Transportation's</strong> stated equity commitments.
-            Results should inform how the city prioritizes capital investment in cycling infrastructure.
+            This analysis connects to Portland's Vision Zero goals and PBOT's stated equity commitments. The findings raise questions about how the city prioritizes capital investment and whether current planning processes are reaching communities that stand to benefit most from safe, accessible active transportation. Density is one measure, but connectivity, safety, and usefulness are just as important.
           </p>
         </div>
       </div>
@@ -1111,69 +1110,7 @@
 
       // ─── Populate Equity Section ───────────────────────────────
       function populateEquitySection() {
-        const corrIncome = summaryData.corr_income;
-        const corrWhite = summaryData.corr_diversity;
-
-        let narrative = '';
-
-        // Income narrative
-        if (corrIncome < -0.15) {
-          narrative += `<p class="equity-section__text">` +
-            `<strong>Contrary to what might be expected</strong>, Portland's bike lane infrastructure shows a ` +
-            `<span class="equity-highlight equity-highlight--positive">negative correlation (r = ${corrIncome.toFixed(3)})</span> ` +
-            `with median household income. Lower-income census tracts tend to have <strong>higher</strong> bike lane density ` +
-            `than wealthier neighborhoods. The lowest-income quintile averages ` +
-            `<strong>${formatFloat(summaryData.income_quintiles?.['Q1 (Lowest)'], 1)} mi/sq mi</strong>, roughly double the ` +
-            `<strong>${formatFloat(summaryData.income_quintiles?.['Q5 (Highest)'], 1)} mi/sq mi</strong> seen in the highest-income quintile.</p>`;
-        } else if (corrIncome > 0.15) {
-          narrative += `<p class="equity-section__text">` +
-            `The data reveals that bike lane infrastructure is ` +
-            `<span class="equity-highlight equity-highlight--negative">positively correlated (r = ${corrIncome.toFixed(3)})</span> ` +
-            `with median household income, meaning wealthier neighborhoods have disproportionately more cycling infrastructure.</p>`;
-        } else {
-          narrative += `<p class="equity-section__text">` +
-            `The relationship between bike lane density and income is ` +
-            `<span class="equity-highlight equity-highlight--neutral">weak (r = ${corrIncome.toFixed(3)})</span>, ` +
-            `suggesting income alone is not a strong predictor of cycling infrastructure presence.</p>`;
-        }
-
-        // Race narrative
-        if (Math.abs(corrWhite) < 0.1) {
-          narrative += `<p class="equity-section__text">` +
-            `Regarding race, the correlation between bike lane density and % White population is ` +
-            `<span class="equity-highlight equity-highlight--neutral">very weak (r = ${corrWhite.toFixed(3)})</span>. ` +
-            `This suggests that racial composition alone does not strongly predict whether a tract has good cycling infrastructure. ` +
-            `However, this aggregate finding may mask important patterns at the neighborhood level.</p>`;
-        } else if (corrWhite > 0.1) {
-          narrative += `<p class="equity-section__text">` +
-            `The data shows a <span class="equity-highlight equity-highlight--negative">positive correlation (r = ${corrWhite.toFixed(3)})</span> ` +
-            `between % White population and bike lane density, indicating that whiter neighborhoods have more infrastructure.</p>`;
-        } else {
-          narrative += `<p class="equity-section__text">` +
-            `The racial correlation is <span class="equity-highlight equity-highlight--positive">slightly negative (r = ${corrWhite.toFixed(3)})</span>, ` +
-            `meaning more diverse tracts have slightly higher bike lane density on average.</p>`;
-        }
-
-        // Vision Zero / PBOT context
-        narrative += `<p class="equity-section__text">` +
-          `<strong>Vision Zero & PBOT Equity Context:</strong> Portland's Vision Zero initiative aims to eliminate traffic fatalities and serious injuries, ` +
-          `with a particular focus on historically underserved communities. The Portland Bureau of Transportation (PBOT) has stated equity commitments ` +
-          `to prioritize investment in communities that have been disproportionately impacted by traffic violence.</p>`;
-
-        narrative += `<p class="equity-section__text">` +
-          `The finding that <strong>${summaryData.tracts_without_bikes} tracts lack any active bike infrastructure</strong> ` +
-          `is particularly relevant. Even if citywide correlations are weak, the existence of complete coverage gaps—and ` +
-          `<em>who lives in those gaps</em>—remains a key equity question. Decision-makers should examine not just average density ` +
-          `but also the <strong>quality and connectivity</strong> of bike infrastructure, as a few disconnected bike lanes in a low-income ` +
-          `neighborhood may not provide the same benefit as a well-connected network in a wealthier one.</p>`;
-
-        narrative += `<p class="equity-section__text">` +
-          `These findings suggest that Portland's bike network investment has, at the aggregate level, not disproportionately favored ` +
-          `wealthy White neighborhoods—but the <strong>completeness, connectivity, and quality</strong> of that infrastructure warrants further investigation. ` +
-          `Cities across the US can learn from this approach by examining not just <em>how much</em> infrastructure exists, ` +
-          `but <em>how well</em> it serves the communities that need safe, accessible active transportation the most.</p>`;
-
-        document.getElementById('equity-content').innerHTML = narrative;
+        // Text is hardcoded in HTML, so no JS population needed for equity section
       }
 
       // ─── Scroll Animations ─────────────────────────────────────
