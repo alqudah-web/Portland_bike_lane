@@ -222,7 +222,9 @@
         <div class="insight-card__title">Income-Density Finding</div>
         <div class="insight-card__stat insight-card__stat--teal" id="insight-income-corr">r = -0.352</div>
         <div class="insight-card__text" id="insight-income-text">
-          There is a moderate negative correlation between bike lane density and median household income. Lower-income tracts average 6.4 mi/sq mi compared to 3.5 mi/sq mi in the wealthiest tracts. The pattern holds for protected lanes too as the lowest income quintile averages 1.94 mi/sq mi compared to just 0.37 in the highest.
+          There is a moderate negative correlation between bike lane density and median household income. Lower-income
+          tracts average 6.4 mi/sq mi compared to 3.5 mi/sq mi in the wealthiest tracts. The pattern holds for protected
+          lanes too as the lowest income quintile averages 1.94 mi/sq mi compared to just 0.37 in the highest.
         </div>
       </div>
 
@@ -231,7 +233,9 @@
         <div class="insight-card__title">Race-Diversity Finding</div>
         <div class="insight-card__stat insight-card__stat--amber" id="insight-race-corr">r = -0.020</div>
         <div class="insight-card__text" id="insight-race-text">
-          There is a very weak correlation between overall bike lane density and neighborhood diversity. However protected lanes tell a different story becuase the most diverse quintile averages 1.26 mi/sq mi compared to 0.47 in the least diverse quintile, roughly 3x more.
+          There is a very weak correlation between overall bike lane density and neighborhood diversity. However
+          protected lanes tell a different story becuase the most diverse quintile averages 1.26 mi/sq mi compared to
+          0.47 in the least diverse quintile, roughly 3x more.
         </div>
       </div>
 
@@ -240,7 +244,8 @@
         <div class="insight-card__title">Coverage Gaps</div>
         <div class="insight-card__stat insight-card__stat--rose" id="insight-gap-stat">3 tracts</div>
         <div class="insight-card__text" id="insight-gap-text">
-          3 out of 169 census tracts have zero active bike infrastructure. These gaps raise important equity questions about which communities lack safe cycling access entirely.
+          3 out of 169 census tracts have zero active bike infrastructure. These gaps raise important equity questions
+          about which communities lack safe cycling access entirely.
         </div>
       </div>
     </div>
@@ -249,12 +254,26 @@
     <section class="equity-section animate-on-scroll" id="equity-section">
       <h2 class="equity-section__title">⚖️ Equity Analysis & Policy Implications</h2>
       <div id="equity-content">
-        <p class="equity-section__text">Portland's bike infrastructure is denser in lower-income and more diverse neighborhoods, but that doesn't mean the city has solved cycling equity.</p>
-        <p class="equity-section__text">The income pattern is largely explained by urban form because Portland's bike network is concentrated in the central city. Dense, walkable neighborhoods close to downtown on both sides of the river tend to be lower-income relative to outer neighborhoods like the West Hills or outer East Portland, which are wealthier but more spread out and car-dependent. Density runs high in the central city by geography, not necessarily by intentional equity investment.</p>
-        <p class="equity-section__text">Higher density does not equal better access. A few disconnected lanes in a lower-income neighborhood don't provide the same benefit as a well-connected network that gets people to jobs, transit, and services.</p>
-        <p class="equity-section__text">Protected lanes reveal a clearer equity signal. When we isolate infrastructure that actually keeps cyclists safe through physical separation from cars, the most diverse tracts have nearly 3x more protected infrastructure than the least diverse tracts. That gap matters for cyclist safety.</p>
-        <p class="equity-section__text">The real equity question is network reach. The central city is relatively well connected, but the outer neighborhoods and suburbs surrounding it have far less infrastructure. That gap means cycling is only truly accessible to people who already live close to downtown. For Portland to deliver on its equity commitments, the bike network needs to extend outward so that all residents, regardless of income, can realistically use a bike to reach parks, jobs, transit, and services.</p>
-        <p class="equity-section__text">These findings connect directly to Portland's Vision Zero goals and PBOT's stated equity commitments around prioritizing investment in underserved communities.</p>
+        <p class="equity-section__text">Portland's bike infrastructure is denser in lower-income and more diverse
+          neighborhoods, but that doesn't mean the city has solved cycling equity.</p>
+        <p class="equity-section__text">The income pattern is largely explained by urban form because Portland's bike
+          network is concentrated in the central city. Dense, walkable neighborhoods close to downtown on both sides of
+          the river tend to be lower-income relative to outer neighborhoods like the West Hills or outer East Portland,
+          which are wealthier but more spread out and car-dependent. Density runs high in the central city by geography,
+          not necessarily by intentional equity investment.</p>
+        <p class="equity-section__text">Higher density does not equal better access. A few disconnected lanes in a
+          lower-income neighborhood don't provide the same benefit as a well-connected network that gets people to jobs,
+          transit, and services.</p>
+        <p class="equity-section__text">Protected lanes reveal a clearer equity signal. When we isolate infrastructure
+          that actually keeps cyclists safe through physical separation from cars, the most diverse tracts have nearly
+          3x more protected infrastructure than the least diverse tracts. That gap matters for cyclist safety.</p>
+        <p class="equity-section__text">The real equity question is network reach. The central city is relatively well
+          connected, but the outer neighborhoods and suburbs surrounding it have far less infrastructure. That gap means
+          cycling is only truly accessible to people who already live close to downtown. For Portland to deliver on its
+          equity commitments, the bike network needs to extend outward so that all residents, regardless of income, can
+          realistically use a bike to reach parks, jobs, transit, and services.</p>
+        <p class="equity-section__text">These findings connect directly to Portland's Vision Zero goals and PBOT's
+          stated equity commitments around prioritizing investment in underserved communities.</p>
       </div>
     </section>
 
@@ -281,13 +300,20 @@
         <div class="footer-section">
           <h3 class="footer-section__title">Methodology</h3>
           <p class="footer-section__text">
-            Bike lane density = total active bike lane miles / tract area (sq mi). Bike segments are clipped to tract boundaries using gpd.overlay() in UTM Zone 10N. Lane length is measured from the clipped geometry to avoid double-counting segments that cross tract boundaries. Only active facilities are included. Protected lanes are filtered to PBL and TRL facility types only. Tract area is calculated using the Portland-clipped portion of each tract.
+            Bike lane density = total active bike lane miles / tract area (sq mi). Bike segments are clipped to tract
+            boundaries using gpd.overlay() in UTM Zone 10N. Lane length is measured from the clipped geometry to avoid
+            double-counting segments that cross tract boundaries. Only active facilities are included. Protected lanes
+            are filtered to PBL and TRL facility types only. Tract area is calculated using the Portland-clipped portion
+            of each tract.
           </p>
         </div>
         <div class="footer-section">
           <h3 class="footer-section__title">Context</h3>
           <p class="footer-section__text">
-            This analysis connects to Portland's Vision Zero goals and PBOT's stated equity commitments. The findings raise questions about how the city prioritizes capital investment and whether current planning processes are reaching communities that stand to benefit most from safe, accessible active transportation. Density is one measure, but connectivity, safety, and usefulness are just as important.
+            This analysis connects to Portland's Vision Zero goals and PBOT's stated equity commitments. The findings
+            raise questions about how the city prioritizes capital investment and whether current planning processes are
+            reaching communities that stand to benefit most from safe, accessible active transportation. Density is one
+            measure, but connectivity, safety, and usefulness are just as important.
           </p>
         </div>
       </div>
