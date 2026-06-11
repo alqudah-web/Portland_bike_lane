@@ -150,12 +150,11 @@
         <div class="glass-card__header">
           <h2 class="glass-card__title">
             <span class="glass-card__title-icon">🛡️</span>
-            Extremes: Income vs Protected Bike Lanes
+            Protected Bike Density by Income Quintile
           </h2>
         </div>
         <p class="glass-card__description">
-          Average protected bike lane density in the 5 tracts with the lowest income compared to the 5 tracts with the
-          highest income.
+          Average protected bike lane density across five equal bins, sorted from lowest to highest income tracts.
         </p>
         <div class="chart-wrapper">
           <canvas id="chart-bar-income-protected"></canvas>
@@ -174,12 +173,12 @@
         <div class="glass-card__header">
           <h2 class="glass-card__title">
             <span class="glass-card__title-icon">📊</span>
-            Density vs. % White Population
+            Density vs. Diversity
           </h2>
         </div>
         <p class="glass-card__description">
-          Each dot represents a census tract. The trendline shows the relationship between bike lane density and the
-          proportion of White residents.
+          Each dot represents a census tract. The trendline shows the relationship between bike lane density and
+          neighborhood diversity.
         </p>
         <div class="chart-wrapper">
           <canvas id="chart-scatter-white"></canvas>
@@ -190,11 +189,11 @@
         <div class="glass-card__header">
           <h2 class="glass-card__title">
             <span class="glass-card__title-icon">📈</span>
-            Bike Density by % White Quintile
+            Bike Density by Diversity Quintile
           </h2>
         </div>
         <p class="glass-card__description">
-          Tracts grouped into five equal bins from least to most White population share, showing average bike lane
+          Tracts grouped into five equal bins by diversity, showing average bike lane
           density in each group.
         </p>
         <div class="chart-wrapper">
@@ -205,33 +204,15 @@
       <div class="glass-card">
         <div class="glass-card__header">
           <h2 class="glass-card__title">
-            <span class="glass-card__title-icon">📊</span>
-            Extremes: Most Diverse vs. Whitest Tracts
-          </h2>
-        </div>
-        <p class="glass-card__description">
-          Average bike lane density in the 5 tracts with the lowest % White population compared to the 5 tracts with the
-          highest % White population.
-        </p>
-        <div class="chart-wrapper">
-          <canvas id="chart-bar-extremes"></canvas>
-        </div>
-      </div>
-
-      <div class="glass-card">
-        <div class="glass-card__header">
-          <h2 class="glass-card__title">
             <span class="glass-card__title-icon">🛡️</span>
-            Extremes: Race vs Protected Bike Lanes
+            Protected Bike Density by Diversity Quintile
           </h2>
         </div>
         <p class="glass-card__description">
-          Average protected bike lane density in the 5 tracts with the lowest % White population compared to the 5
-          tracts with the
-          highest % White population.
+          Average protected bike lane density across five equal bins, sorted from least to most diverse tracts.
         </p>
         <div class="chart-wrapper">
-          <canvas id="chart-bar-extremes-protected"></canvas>
+          <canvas id="chart-bar-protected-diversity"></canvas>
         </div>
       </div>
     </div>
@@ -326,6 +307,7 @@
   <!-- Scripts -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
   <script>
     // ═══════════════════════════════════════════════════════════════
     // Portland Bike Lane Equity Dashboard — Main Application
@@ -469,7 +451,7 @@
         document.getElementById('stat-protected-miles').textContent = (summaryData.total_protected_miles || 0).toFixed(0);
         document.getElementById('stat-tracts').textContent = summaryData.total_tracts;
         document.getElementById('stat-corr-income').textContent = summaryData.corr_income.toFixed(3);
-        document.getElementById('stat-corr-white').textContent = summaryData.corr_white.toFixed(3);
+        document.getElementById('stat-corr-white').textContent = summaryData.corr_diversity.toFixed(3);
         document.getElementById('stat-no-bike').textContent = summaryData.tracts_without_bikes;
       }
 
@@ -691,18 +673,23 @@
         Chart.defaults.color = '#94a3b8';
         Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
         Chart.defaults.font.family = "'Inter', sans-serif";
+        if (typeof ChartDataLabels !== 'undefined') {
+          Chart.register(ChartDataLabels);
+        } else {
+          console.error('ChartDataLabels plugin not found');
+        }
 
         const features = tractsData.features.filter(f =>
           f.properties.bike_density != null &&
-          f.properties.pct_white != null &&
+          f.properties.pct_nonwhite != null &&
           f.properties.median_income != null &&
           !isNaN(f.properties.bike_density) &&
           !isNaN(f.properties.median_income)
         );
 
-        // ─── Scatter: Density vs % White ─────────────────────
+        // ─── Scatter: Density vs Diversity ─────────────────────
         const scatterWhiteData = features.map(f => ({
-          x: f.properties.pct_white,
+          x: f.properties.pct_nonwhite,
           y: f.properties.bike_density
         }));
 
@@ -748,13 +735,14 @@
                 borderWidth: 1,
                 padding: 12,
                 callbacks: {
-                  label: ctx => `${ctx.parsed.x.toFixed(1)}% White → ${ctx.parsed.y.toFixed(2)} mi/sq mi`
+                  label: ctx => `${ctx.parsed.x.toFixed(1)}% Non-White → ${ctx.parsed.y.toFixed(2)} mi/sq mi`
                 }
-              }
+              },
+              datalabels: { display: false }
             },
             scales: {
               x: {
-                title: { display: true, text: '% White Population', color: '#94a3b8', font: { weight: 600 } },
+                title: { display: true, text: 'Diversity (% Non-White)', color: '#94a3b8', font: { weight: 600 } },
                 grid: { color: 'rgba(255,255,255,0.04)' },
                 min: 0, max: 100
               },
@@ -817,7 +805,8 @@
                 callbacks: {
                   label: ctx => `$${ctx.parsed.x.toFixed(0)}k income → ${ctx.parsed.y.toFixed(2)} mi/sq mi`
                 }
-              }
+              },
+              datalabels: { display: false }
             },
             scales: {
               x: {
@@ -867,6 +856,13 @@
               maintainAspectRatio: false,
               plugins: {
                 legend: { display: false },
+                datalabels: {
+                  anchor: 'end',
+                  align: 'start',
+                  color: '#ffffff',
+                  font: { weight: 'bold', family: "'Inter', sans-serif" },
+                  formatter: function (value) { return value.toFixed(2); }
+                },
                 tooltip: {
                   backgroundColor: 'rgba(17, 24, 39, 0.95)',
                   titleColor: '#14b8a6',
@@ -891,10 +887,10 @@
           });
         }
 
-        // ─── Bar: % White Quintiles ──────────────────────────
-        if (summaryData.white_quintiles) {
-          const wLabels = Object.keys(summaryData.white_quintiles);
-          const wValues = Object.values(summaryData.white_quintiles);
+        // ─── Bar: Diversity Quintiles ──────────────────────────
+        if (summaryData.diversity_quintiles) {
+          const wLabels = ['Q1 (Least Diverse)', 'Q2', 'Q3', 'Q4', 'Q5 (Most Diverse)'];
+          const wValues = Object.values(summaryData.diversity_quintiles).reverse();
 
           new Chart(document.getElementById('chart-bar-white'), {
             type: 'bar',
@@ -926,6 +922,13 @@
               maintainAspectRatio: false,
               plugins: {
                 legend: { display: false },
+                datalabels: {
+                  anchor: 'end',
+                  align: 'start',
+                  color: '#ffffff',
+                  font: { weight: 'bold', family: "'Inter', sans-serif" },
+                  formatter: function (value) { return value.toFixed(2); }
+                },
                 tooltip: {
                   backgroundColor: 'rgba(17, 24, 39, 0.95)',
                   titleColor: '#14b8a6',
@@ -950,209 +953,139 @@
           });
         }
 
-        // ─── Bar: Most Diverse vs Whitest ───────────────────────
-        if (tractsData && tractsData.features) {
-          // Filter tracts that have valid pct_white and bike_density
-          let validTracts = tractsData.features.filter(f =>
-            f.properties.pct_white != null &&
-            !isNaN(f.properties.pct_white) &&
-            f.properties.bike_density != null &&
-            !isNaN(f.properties.bike_density)
-          );
+        // ─── Bar: Protected Bike Density by Diversity Quintile ───────────────────────
+        if (summaryData.diversity_quintiles_protected) {
+          const wLabels = ['Q1 (Least Diverse)', 'Q2', 'Q3', 'Q4', 'Q5 (Most Diverse)'];
+          const wValues = Object.values(summaryData.diversity_quintiles_protected).reverse();
 
-          // Sort by pct_white ascending
-          validTracts.sort((a, b) => a.properties.pct_white - b.properties.pct_white);
-
-          if (validTracts.length >= 10) {
-            const bottom5 = validTracts.slice(0, 5);
-            const top5 = validTracts.slice(-5);
-
-            const avgBottom = bottom5.reduce((sum, f) => sum + f.properties.bike_density, 0) / 5;
-            const avgTop = top5.reduce((sum, f) => sum + f.properties.bike_density, 0) / 5;
-
-            new Chart(document.getElementById('chart-bar-extremes'), {
-              type: 'bar',
-              data: {
-                labels: ['Most Diverse Tracts (Bottom 5% White)', 'Whitest Tracts (Top 5% White)'],
-                datasets: [{
-                  label: 'Avg Bike Density (mi/sq mi)',
-                  data: [avgBottom, avgTop],
-                  backgroundColor: [
-                    'rgba(244, 63, 94, 0.7)',
-                    'rgba(14, 165, 233, 0.7)'
-                  ],
-                  borderColor: [
-                    '#f43f5e',
-                    '#0ea5e9'
-                  ],
-                  borderWidth: 1,
-                  borderRadius: 6
-                }]
-              },
-              options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: { display: false },
-                  tooltip: {
-                    backgroundColor: 'rgba(17, 24, 39, 0.95)',
-                    titleColor: '#14b8a6',
-                    bodyColor: '#e2e8f0',
-                    borderColor: 'rgba(255,255,255,0.1)',
-                    borderWidth: 1,
-                    padding: 12
-                  }
+          new Chart(document.getElementById('chart-bar-protected-diversity'), {
+            type: 'bar',
+            data: {
+              labels: wLabels,
+              datasets: [{
+                label: 'Avg Protected Density (mi/sq mi)',
+                data: wValues,
+                backgroundColor: [
+                  'rgba(139, 92, 246, 0.7)',
+                  'rgba(99, 102, 241, 0.7)',
+                  'rgba(59, 130, 246, 0.7)',
+                  'rgba(20, 184, 166, 0.7)',
+                  'rgba(16, 185, 129, 0.7)'
+                ],
+                borderColor: [
+                  '#8b5cf6',
+                  '#6366f1',
+                  '#3b82f6',
+                  '#14b8a6',
+                  '#10b981'
+                ],
+                borderWidth: 1,
+                borderRadius: 6
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { display: false },
+                datalabels: {
+                  anchor: 'end',
+                  align: 'start',
+                  color: '#ffffff',
+                  font: { weight: 'bold', family: "'Inter', sans-serif" },
+                  formatter: function (value) { return value.toFixed(2); }
                 },
-                scales: {
-                  x: {
-                    grid: { display: false },
-                    ticks: { font: { size: 12 } }
-                  },
-                  y: {
-                    title: { display: true, text: 'Avg Bike Density (mi/sq mi)', color: '#94a3b8', font: { weight: 600 } },
-                    grid: { color: 'rgba(255,255,255,0.04)' },
-                    beginAtZero: true
-                  }
+                tooltip: {
+                  backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                  titleColor: '#14b8a6',
+                  bodyColor: '#e2e8f0',
+                  borderColor: 'rgba(255,255,255,0.1)',
+                  borderWidth: 1,
+                  padding: 12
+                }
+              },
+              scales: {
+                x: {
+                  grid: { display: false },
+                  ticks: { font: { size: 11 } }
+                },
+                y: {
+                  title: { display: true, text: 'Avg Protected Density (mi/sq mi)', color: '#94a3b8', font: { weight: 600 } },
+                  grid: { color: 'rgba(255,255,255,0.04)' },
+                  beginAtZero: true
                 }
               }
-            });
-          }
+            }
+          });
         }
 
-        // ─── Bar: Income Extremes (Protected) ───────────────────────
-        if (tractsData && tractsData.features) {
-          let validIncomeTracts = tractsData.features.filter(f =>
-            f.properties.median_income != null &&
-            f.properties.median_income > 0 &&
-            !isNaN(f.properties.median_income) &&
-            f.properties.protected_bike_density != null &&
-            !isNaN(f.properties.protected_bike_density)
-          );
+        // ─── Bar: Protected Bike Density by Income Quintile ───────────────────────
+        if (summaryData.income_quintiles_protected) {
+          const wLabels = ['Q1 (Lowest Income)', 'Q2', 'Q3', 'Q4', 'Q5 (Highest Income)'];
+          const wValues = Object.values(summaryData.income_quintiles_protected);
 
-          validIncomeTracts.sort((a, b) => a.properties.median_income - b.properties.median_income);
-
-          if (validIncomeTracts.length >= 10) {
-            const bottom5Inc = validIncomeTracts.slice(0, 5);
-            const top5Inc = validIncomeTracts.slice(-5);
-
-            const avgBottomInc = bottom5Inc.reduce((sum, f) => sum + f.properties.protected_bike_density, 0) / 5;
-            const avgTopInc = top5Inc.reduce((sum, f) => sum + f.properties.protected_bike_density, 0) / 5;
-
-            new Chart(document.getElementById('chart-bar-income-protected'), {
-              type: 'bar',
-              data: {
-                labels: ['Lowest Income Tracts (Bottom 5)', 'Highest Income Tracts (Top 5)'],
-                datasets: [{
-                  label: 'Avg Protected Density (mi/sq mi)',
-                  data: [avgBottomInc, avgTopInc],
-                  backgroundColor: [
-                    'rgba(245, 158, 11, 0.7)',
-                    'rgba(16, 185, 129, 0.7)'
-                  ],
-                  borderColor: [
-                    '#f59e0b',
-                    '#10b981'
-                  ],
-                  borderWidth: 1,
-                  borderRadius: 6
-                }]
-              },
-              options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: { display: false },
-                  tooltip: {
-                    backgroundColor: 'rgba(17, 24, 39, 0.95)',
-                    titleColor: '#14b8a6',
-                    bodyColor: '#e2e8f0',
-                    borderColor: 'rgba(255,255,255,0.1)',
-                    borderWidth: 1,
-                    padding: 12
-                  }
+          new Chart(document.getElementById('chart-bar-income-protected'), {
+            type: 'bar',
+            data: {
+              labels: wLabels,
+              datasets: [{
+                label: 'Avg Protected Density (mi/sq mi)',
+                data: wValues,
+                backgroundColor: [
+                  'rgba(245, 158, 11, 0.7)',
+                  'rgba(251, 191, 36, 0.7)',
+                  'rgba(52, 211, 153, 0.7)',
+                  'rgba(16, 185, 129, 0.7)',
+                  'rgba(5, 150, 105, 0.7)'
+                ],
+                borderColor: [
+                  '#f59e0b',
+                  '#fbbf24',
+                  '#34d399',
+                  '#10b981',
+                  '#059669'
+                ],
+                borderWidth: 1,
+                borderRadius: 6
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { display: false },
+                datalabels: {
+                  anchor: 'end',
+                  align: 'start',
+                  color: '#ffffff',
+                  font: { weight: 'bold', family: "'Inter', sans-serif" },
+                  formatter: function (value) { return value.toFixed(2); }
                 },
-                scales: {
-                  x: {
-                    grid: { display: false },
-                    ticks: { font: { size: 12 } }
-                  },
-                  y: {
-                    title: { display: true, text: 'Avg Protected Density (mi/sq mi)', color: '#94a3b8', font: { weight: 600 } },
-                    grid: { color: 'rgba(255,255,255,0.04)' },
-                    beginAtZero: true
-                  }
+                tooltip: {
+                  backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                  titleColor: '#14b8a6',
+                  bodyColor: '#e2e8f0',
+                  borderColor: 'rgba(255,255,255,0.1)',
+                  borderWidth: 1,
+                  padding: 12
+                }
+              },
+              scales: {
+                x: {
+                  grid: { display: false },
+                  ticks: { font: { size: 11 } }
+                },
+                y: {
+                  title: { display: true, text: 'Avg Protected Density (mi/sq mi)', color: '#94a3b8', font: { weight: 600 } },
+                  grid: { color: 'rgba(255,255,255,0.04)' },
+                  beginAtZero: true
                 }
               }
-            });
-          }
+            }
+          });
         }
 
-        // ─── Bar: Most Diverse vs Whitest (Protected) ───────────────
-        if (tractsData && tractsData.features) {
-          let validRaceTracts = tractsData.features.filter(f =>
-            f.properties.pct_white != null &&
-            !isNaN(f.properties.pct_white) &&
-            f.properties.protected_bike_density != null &&
-            !isNaN(f.properties.protected_bike_density)
-          );
 
-          validRaceTracts.sort((a, b) => a.properties.pct_white - b.properties.pct_white);
-
-          if (validRaceTracts.length >= 10) {
-            const bottom5 = validRaceTracts.slice(0, 5);
-            const top5 = validRaceTracts.slice(-5);
-
-            const avgBottomProt = bottom5.reduce((sum, f) => sum + f.properties.protected_bike_density, 0) / 5;
-            const avgTopProt = top5.reduce((sum, f) => sum + f.properties.protected_bike_density, 0) / 5;
-
-            new Chart(document.getElementById('chart-bar-extremes-protected'), {
-              type: 'bar',
-              data: {
-                labels: ['Most Diverse Tracts (Bottom 5% White)', 'Whitest Tracts (Top 5% White)'],
-                datasets: [{
-                  label: 'Avg Protected Density (mi/sq mi)',
-                  data: [avgBottomProt, avgTopProt],
-                  backgroundColor: [
-                    'rgba(244, 63, 94, 0.7)',
-                    'rgba(14, 165, 233, 0.7)'
-                  ],
-                  borderColor: [
-                    '#f43f5e',
-                    '#0ea5e9'
-                  ],
-                  borderWidth: 1,
-                  borderRadius: 6
-                }]
-              },
-              options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: { display: false },
-                  tooltip: {
-                    backgroundColor: 'rgba(17, 24, 39, 0.95)',
-                    titleColor: '#14b8a6',
-                    bodyColor: '#e2e8f0',
-                    borderColor: 'rgba(255,255,255,0.1)',
-                    borderWidth: 1,
-                    padding: 12
-                  }
-                },
-                scales: {
-                  x: {
-                    grid: { display: false },
-                    ticks: { font: { size: 12 } }
-                  },
-                  y: {
-                    title: { display: true, text: 'Avg Protected Density (mi/sq mi)', color: '#94a3b8', font: { weight: 600 } },
-                    grid: { color: 'rgba(255,255,255,0.04)' },
-                    beginAtZero: true
-                  }
-                }
-              }
-            });
-          }
-        }
       }
 
       // ─── Trendline Calculation ─────────────────────────────────
@@ -1174,7 +1107,7 @@
       // ─── Populate Insights ─────────────────────────────────────
       function populateInsights() {
         const corrIncome = summaryData.corr_income;
-        const corrWhite = summaryData.corr_white;
+        const corrWhite = summaryData.corr_diversity;
 
         // Income insight
         document.getElementById('insight-income-corr').textContent = `r = ${corrIncome.toFixed(3)}`;
@@ -1194,9 +1127,9 @@
           Math.abs(corrWhite) < 0.3 ? 'weak' :
             Math.abs(corrWhite) < 0.5 ? 'moderate' : 'strong';
         document.getElementById('insight-race-text').innerHTML =
-          `There is a <strong>${raceStrength} ${raceDir}</strong> correlation between bike lane density and the % White population. ` +
-          `The least-White quintile averages <strong>${formatFloat(summaryData.white_quintiles?.['Q1 (Lowest)'], 1)} mi/sq mi</strong> ` +
-          `vs. <strong>${formatFloat(summaryData.white_quintiles?.['Q5 (Highest)'], 1)} mi/sq mi</strong> in the whitest tracts.`;
+          `There is a <strong>${raceStrength} ${raceDir}</strong> correlation between bike lane density and neighborhood diversity. ` +
+          `The most diverse quintile averages <strong>${formatFloat(summaryData.diversity_quintiles?.['Q1 (Lowest)'], 1)} mi/sq mi</strong> ` +
+          `vs. <strong>${formatFloat(summaryData.diversity_quintiles?.['Q5 (Highest)'], 1)} mi/sq mi</strong> in the least diverse tracts.`;
 
         // Coverage gap insight
         document.getElementById('insight-gap-stat').textContent = `${summaryData.tracts_without_bikes} tracts`;
@@ -1209,7 +1142,7 @@
       // ─── Populate Equity Section ───────────────────────────────
       function populateEquitySection() {
         const corrIncome = summaryData.corr_income;
-        const corrWhite = summaryData.corr_white;
+        const corrWhite = summaryData.corr_diversity;
 
         let narrative = '';
 

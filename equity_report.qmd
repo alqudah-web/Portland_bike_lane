@@ -170,38 +170,38 @@ Comparing the correlations, we find:
 
 This indicates that both general bike lanes and high-quality, protected bike infrastructure are more concentrated in Portland's more diverse, lower-income neighborhoods. This aligns with PBOT's equity goals of directing infrastructure investments toward underserved areas.
 
-### Extremes Analysis for Protected Infrastructure
+### Protected Infrastructure by Quintiles
 
-To further highlight equity disparities, we compare the average protected bike lane density between the 5 tracts at each extreme for both race and income.
+To further highlight equity disparities, we compare the average protected bike lane density across quintiles for both diversity (1=Least Diverse, 5=Most Diverse) and income.
 
 ```{python}
-# Extremes for Race
-valid_race = df.dropna(subset=['pct_white', 'protected_bike_density']).sort_values('pct_white')
-bottom5_race = valid_race.head(5)
-top5_race = valid_race.tail(5)
-
-avg_bottom_race = bottom5_race['protected_bike_density'].mean()
-avg_top_race = top5_race['protected_bike_density'].mean()
-
-# Extremes for Income
-valid_income = df[df['median_income'] > 0].dropna(subset=['median_income', 'protected_bike_density']).sort_values('median_income')
-bottom5_inc = valid_income.head(5)
-top5_inc = valid_income.tail(5)
-
-avg_bottom_inc = bottom5_inc['protected_bike_density'].mean()
-avg_top_inc = top5_inc['protected_bike_density'].mean()
-
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
 
-# Race Extremes Bar Chart
-ax1.bar(['Most Diverse\n(Bottom 5)', 'Whitest\n(Top 5)'], [avg_bottom_race, avg_top_race], color=['#f43f5e', '#0ea5e9'])
-ax1.set_title('Extremes: Race vs Protected Bike Density')
-ax1.set_ylabel('Avg Protected Density (mi/sq mi)')
+# Calculate Quintiles
+valid_q = df[df['bike_density'] > 0].copy()
+valid_q['income_quintile'] = pd.qcut(valid_q['median_income'], 5, labels=['Q1', 'Q2', 'Q3', 'Q4', 'Q5'], duplicates='drop')
+valid_q['white_quintile'] = pd.qcut(valid_q['pct_white'], 5, labels=['Q1', 'Q2', 'Q3', 'Q4', 'Q5'], duplicates='drop')
 
-# Income Extremes Bar Chart
-ax2.bar(['Lowest Income\n(Bottom 5)', 'Highest Income\n(Top 5)'], [avg_bottom_inc, avg_top_inc], color=['#f59e0b', '#10b981'])
-ax2.set_title('Extremes: Income vs Protected Bike Density')
+income_q_prot = valid_q.groupby('income_quintile')['protected_bike_density'].mean()
+white_q_prot = valid_q.groupby('white_quintile')['protected_bike_density'].mean()
+
+# Diversity Quintiles Bar Chart (Reversing white_quintiles so Q1=Least Diverse)
+diversity_labels = ['Q1 (Least Diverse)', 'Q2', 'Q3', 'Q4', 'Q5 (Most Diverse)']
+diversity_values = white_q_prot.values[::-1]
+bars1 = ax1.bar(diversity_labels, diversity_values, color=['#8b5cf6', '#6366f1', '#3b82f6', '#14b8a6', '#10b981'])
+ax1.bar_label(bars1, fmt='%.2f', label_type='edge', padding=-15, color='white', fontweight='bold')
+ax1.set_title('Protected Bike Density by Diversity Quintile')
+ax1.set_ylabel('Avg Protected Density (mi/sq mi)')
+ax1.tick_params(axis='x', rotation=45)
+
+# Income Quintiles Bar Chart
+income_labels = ['Q1 (Lowest Income)', 'Q2', 'Q3', 'Q4', 'Q5 (Highest Income)']
+income_values = income_q_prot.values
+bars2 = ax2.bar(income_labels, income_values, color=['#f59e0b', '#fbbf24', '#34d399', '#10b981', '#059669'])
+ax2.bar_label(bars2, fmt='%.2f', label_type='edge', padding=-15, color='white', fontweight='bold')
+ax2.set_title('Protected Bike Density by Income Quintile')
 ax2.set_ylabel('Avg Protected Density (mi/sq mi)')
+ax2.tick_params(axis='x', rotation=45)
 
 plt.tight_layout()
 plt.show()
