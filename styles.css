@@ -286,7 +286,7 @@ body::before {
 }
 
 .leaflet-popup-content-wrapper {
-  background: var(--bg-secondary) !important;
+  background: #000000 !important;
   color: var(--text-primary) !important;
   border-radius: 12px !important;
   border: 1px solid var(--border-glass) !important;
@@ -294,7 +294,7 @@ body::before {
 }
 
 .leaflet-popup-tip {
-  background: var(--bg-secondary) !important;
+  background: #000000 !important;
 }
 
 .leaflet-popup-content {

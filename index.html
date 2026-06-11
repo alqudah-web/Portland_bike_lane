@@ -107,24 +107,13 @@
       <div class="map-legend" id="map-legend"></div>
     </section>
 
-    <!-- ═══ SCATTER PLOTS ═══ -->
-    <div class="charts-grid animate-on-scroll" id="scatter-section">
-      <div class="glass-card">
-        <div class="glass-card__header">
-          <h2 class="glass-card__title">
-            <span class="glass-card__title-icon">📊</span>
-            Density vs. % White Population
-          </h2>
-        </div>
-        <p class="glass-card__description">
-          Each dot represents a census tract. The trendline shows the relationship between bike lane density and the
-          proportion of White residents.
-        </p>
-        <div class="chart-wrapper">
-          <canvas id="chart-scatter-white"></canvas>
-        </div>
-      </div>
+    <!-- ═══ INCOME CHARTS ═══ -->
+    <div class="glass-card animate-on-scroll"
+      style="margin-top: 3rem; margin-bottom: 1.5rem; text-align: center; padding: 1.5rem;">
+      <h2 class="glass-card__title" style="justify-content: center; font-size: 2rem; margin: 0;">Income Analysis</h2>
+    </div>
 
+    <div class="charts-grid animate-on-scroll" id="income-charts-section">
       <div class="glass-card">
         <div class="glass-card__header">
           <h2 class="glass-card__title">
@@ -140,10 +129,7 @@
           <canvas id="chart-scatter-income"></canvas>
         </div>
       </div>
-    </div>
 
-    <!-- ═══ BAR CHARTS ═══ -->
-    <div class="charts-grid animate-on-scroll" id="bar-section">
       <div class="glass-card">
         <div class="glass-card__header">
           <h2 class="glass-card__title">
@@ -157,6 +143,46 @@
         </p>
         <div class="chart-wrapper">
           <canvas id="chart-bar-income"></canvas>
+        </div>
+      </div>
+
+      <div class="glass-card">
+        <div class="glass-card__header">
+          <h2 class="glass-card__title">
+            <span class="glass-card__title-icon">🛡️</span>
+            Extremes: Income vs Protected Bike Lanes
+          </h2>
+        </div>
+        <p class="glass-card__description">
+          Average protected bike lane density in the 5 tracts with the lowest income compared to the 5 tracts with the
+          highest income.
+        </p>
+        <div class="chart-wrapper">
+          <canvas id="chart-bar-income-protected"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ RACE CHARTS ═══ -->
+    <div class="glass-card animate-on-scroll"
+      style="margin-top: 3rem; margin-bottom: 1.5rem; text-align: center; padding: 1.5rem;">
+      <h2 class="glass-card__title" style="justify-content: center; font-size: 2rem; margin: 0;">Race Analysis</h2>
+    </div>
+
+    <div class="charts-grid animate-on-scroll" id="race-charts-section">
+      <div class="glass-card">
+        <div class="glass-card__header">
+          <h2 class="glass-card__title">
+            <span class="glass-card__title-icon">📊</span>
+            Density vs. % White Population
+          </h2>
+        </div>
+        <p class="glass-card__description">
+          Each dot represents a census tract. The trendline shows the relationship between bike lane density and the
+          proportion of White residents.
+        </p>
+        <div class="chart-wrapper">
+          <canvas id="chart-scatter-white"></canvas>
         </div>
       </div>
 
@@ -191,6 +217,29 @@
           <canvas id="chart-bar-extremes"></canvas>
         </div>
       </div>
+
+      <div class="glass-card">
+        <div class="glass-card__header">
+          <h2 class="glass-card__title">
+            <span class="glass-card__title-icon">🛡️</span>
+            Extremes: Race vs Protected Bike Lanes
+          </h2>
+        </div>
+        <p class="glass-card__description">
+          Average protected bike lane density in the 5 tracts with the lowest % White population compared to the 5
+          tracts with the
+          highest % White population.
+        </p>
+        <div class="chart-wrapper">
+          <canvas id="chart-bar-extremes-protected"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ FINDINGS ═══ -->
+    <div class="glass-card animate-on-scroll"
+      style="margin-top: 3rem; margin-bottom: 1.5rem; text-align: center; padding: 1.5rem;">
+      <h2 class="glass-card__title" style="justify-content: center; font-size: 2rem; margin: 0;">Findings</h2>
     </div>
 
     <!-- ═══ KEY INSIGHTS ═══ -->
@@ -293,6 +342,7 @@
       let showBikesProtected = false;
       let showBikesPlanned = false;
       let showBikesRecomm = false;
+      let highlightedTract = null;
 
       // ─── Color Scales ──────────────────────────────────────────
       const colorScales = {
@@ -493,17 +543,29 @@
         `;
             layer.bindPopup(popup, { maxWidth: 280 });
 
-            layer.on('mouseover', function () {
-              this.setStyle({
-                weight: 2.5,
-                color: '#14b8a6',
-                fillOpacity: isActive ? 0.9 : 0.15,
-                fillColor: isActive ? undefined : '#14b8a6'
+            layer.on('popupopen', function () {
+              if (highlightedTract) {
+                tractsLayer.resetStyle(highlightedTract);
+              }
+              highlightedTract = layer;
+              layer.setStyle({
+                weight: 3,
+                color: '#f59e0b',
+                fillOpacity: isActive ? 0.9 : 0.4
               });
-              this.bringToFront();
+              layer.bringToFront();
+              // Keep bike layers on top
+              if (showBikesActive && bikesActiveLayer) bikesActiveLayer.bringToFront();
+              if (showBikesProtected && bikesProtectedLayer) bikesProtectedLayer.bringToFront();
+              if (showBikesPlanned && bikesPlannedLayer) bikesPlannedLayer.bringToFront();
+              if (showBikesRecomm && bikesRecommLayer) bikesRecommLayer.bringToFront();
             });
-            layer.on('mouseout', function () {
-              tractsLayer.resetStyle(this);
+
+            layer.on('popupclose', function () {
+              tractsLayer.resetStyle(layer);
+              if (highlightedTract === layer) {
+                highlightedTract = null;
+              }
             });
           }
         }).addTo(map);
@@ -514,22 +576,11 @@
         // Active bike lanes
         bikesActiveLayer = L.geoJSON(bikesActiveData, {
           style: function (feature) {
-            const facility = feature.properties.Facility;
-            let color = '#10b981'; // default green
-            let weight = 1.5;
-            if (facility === 'PBL') { color = '#14b8a6'; weight = 2.5; }
-            else if (facility === 'BBL' || facility === 'BBBL') { color = '#34d399'; weight = 2; }
-            else if (facility === 'TRL') { color = '#06b6d4'; weight = 2; }
-            else if (facility === 'BL') { color = '#10b981'; weight = 1.5; }
-            else if (facility === 'SIR' || facility === 'ESR') { color = '#6ee7b7'; weight = 1; }
-            return { color, weight, opacity: 0.7 };
+            return { color: '#10b981', weight: 1.5, opacity: 0.7 }; // Make all active bike lanes the same color
           },
           onEachFeature: function (feature, layer) {
             const p = feature.properties;
-            layer.bindTooltip(`<strong>${p.SegmentNam || ''}</strong><br>${p.Facility} · ${(p.LengthMile || 0).toFixed(2)} mi`, {
-              sticky: true,
-              className: 'bike-tooltip'
-            });
+            layer.bindPopup(`<strong>${p.SegmentNam || ''}</strong><br>${p.Facility} · ${(p.LengthMile || 0).toFixed(2)} mi`);
           }
         });
         if (showBikesActive) bikesActiveLayer.addTo(map);
@@ -549,10 +600,7 @@
           },
           onEachFeature: function (feature, layer) {
             const p = feature.properties;
-            layer.bindTooltip(`<strong>${p.SegmentNam || ''}</strong><br>${p.Facility} (Protected) · ${(p.LengthMile || 0).toFixed(2)} mi`, {
-              sticky: true,
-              className: 'bike-tooltip'
-            });
+            layer.bindPopup(`<strong>${p.SegmentNam || ''}</strong><br>${p.Facility} (Protected) · ${(p.LengthMile || 0).toFixed(2)} mi`);
           }
         });
         if (showBikesProtected) bikesProtectedLayer.addTo(map);
@@ -962,6 +1010,141 @@
                   },
                   y: {
                     title: { display: true, text: 'Avg Bike Density (mi/sq mi)', color: '#94a3b8', font: { weight: 600 } },
+                    grid: { color: 'rgba(255,255,255,0.04)' },
+                    beginAtZero: true
+                  }
+                }
+              }
+            });
+          }
+        }
+
+        // ─── Bar: Income Extremes (Protected) ───────────────────────
+        if (tractsData && tractsData.features) {
+          let validIncomeTracts = tractsData.features.filter(f =>
+            f.properties.median_income != null &&
+            f.properties.median_income > 0 &&
+            !isNaN(f.properties.median_income) &&
+            f.properties.protected_bike_density != null &&
+            !isNaN(f.properties.protected_bike_density)
+          );
+
+          validIncomeTracts.sort((a, b) => a.properties.median_income - b.properties.median_income);
+
+          if (validIncomeTracts.length >= 10) {
+            const bottom5Inc = validIncomeTracts.slice(0, 5);
+            const top5Inc = validIncomeTracts.slice(-5);
+
+            const avgBottomInc = bottom5Inc.reduce((sum, f) => sum + f.properties.protected_bike_density, 0) / 5;
+            const avgTopInc = top5Inc.reduce((sum, f) => sum + f.properties.protected_bike_density, 0) / 5;
+
+            new Chart(document.getElementById('chart-bar-income-protected'), {
+              type: 'bar',
+              data: {
+                labels: ['Lowest Income Tracts (Bottom 5)', 'Highest Income Tracts (Top 5)'],
+                datasets: [{
+                  label: 'Avg Protected Density (mi/sq mi)',
+                  data: [avgBottomInc, avgTopInc],
+                  backgroundColor: [
+                    'rgba(245, 158, 11, 0.7)',
+                    'rgba(16, 185, 129, 0.7)'
+                  ],
+                  borderColor: [
+                    '#f59e0b',
+                    '#10b981'
+                  ],
+                  borderWidth: 1,
+                  borderRadius: 6
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: { display: false },
+                  tooltip: {
+                    backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                    titleColor: '#14b8a6',
+                    bodyColor: '#e2e8f0',
+                    borderColor: 'rgba(255,255,255,0.1)',
+                    borderWidth: 1,
+                    padding: 12
+                  }
+                },
+                scales: {
+                  x: {
+                    grid: { display: false },
+                    ticks: { font: { size: 12 } }
+                  },
+                  y: {
+                    title: { display: true, text: 'Avg Protected Density (mi/sq mi)', color: '#94a3b8', font: { weight: 600 } },
+                    grid: { color: 'rgba(255,255,255,0.04)' },
+                    beginAtZero: true
+                  }
+                }
+              }
+            });
+          }
+        }
+
+        // ─── Bar: Most Diverse vs Whitest (Protected) ───────────────
+        if (tractsData && tractsData.features) {
+          let validRaceTracts = tractsData.features.filter(f =>
+            f.properties.pct_white != null &&
+            !isNaN(f.properties.pct_white) &&
+            f.properties.protected_bike_density != null &&
+            !isNaN(f.properties.protected_bike_density)
+          );
+
+          validRaceTracts.sort((a, b) => a.properties.pct_white - b.properties.pct_white);
+
+          if (validRaceTracts.length >= 10) {
+            const bottom5 = validRaceTracts.slice(0, 5);
+            const top5 = validRaceTracts.slice(-5);
+
+            const avgBottomProt = bottom5.reduce((sum, f) => sum + f.properties.protected_bike_density, 0) / 5;
+            const avgTopProt = top5.reduce((sum, f) => sum + f.properties.protected_bike_density, 0) / 5;
+
+            new Chart(document.getElementById('chart-bar-extremes-protected'), {
+              type: 'bar',
+              data: {
+                labels: ['Most Diverse Tracts (Bottom 5% White)', 'Whitest Tracts (Top 5% White)'],
+                datasets: [{
+                  label: 'Avg Protected Density (mi/sq mi)',
+                  data: [avgBottomProt, avgTopProt],
+                  backgroundColor: [
+                    'rgba(244, 63, 94, 0.7)',
+                    'rgba(14, 165, 233, 0.7)'
+                  ],
+                  borderColor: [
+                    '#f43f5e',
+                    '#0ea5e9'
+                  ],
+                  borderWidth: 1,
+                  borderRadius: 6
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: { display: false },
+                  tooltip: {
+                    backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                    titleColor: '#14b8a6',
+                    bodyColor: '#e2e8f0',
+                    borderColor: 'rgba(255,255,255,0.1)',
+                    borderWidth: 1,
+                    padding: 12
+                  }
+                },
+                scales: {
+                  x: {
+                    grid: { display: false },
+                    ticks: { font: { size: 12 } }
+                  },
+                  y: {
+                    title: { display: true, text: 'Avg Protected Density (mi/sq mi)', color: '#94a3b8', font: { weight: 600 } },
                     grid: { color: 'rgba(255,255,255,0.04)' },
                     beginAtZero: true
                   }
