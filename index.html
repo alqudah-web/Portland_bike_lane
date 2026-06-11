@@ -893,7 +893,7 @@
         // ─── Bar: Diversity Quintiles ──────────────────────────
         if (summaryData.diversity_quintiles) {
           const wLabels = ['Q1 (Least Diverse)', 'Q2', 'Q3', 'Q4', 'Q5 (Most Diverse)'];
-          const wValues = Object.values(summaryData.diversity_quintiles).reverse();
+          const wValues = Object.values(summaryData.diversity_quintiles);
 
           new Chart(document.getElementById('chart-bar-white'), {
             type: 'bar',
@@ -959,7 +959,7 @@
         // ─── Bar: Protected Bike Density by Diversity Quintile ───────────────────────
         if (summaryData.diversity_quintiles_protected) {
           const wLabels = ['Q1 (Least Diverse)', 'Q2', 'Q3', 'Q4', 'Q5 (Most Diverse)'];
-          const wValues = Object.values(summaryData.diversity_quintiles_protected).reverse();
+          const wValues = Object.values(summaryData.diversity_quintiles_protected);
 
           new Chart(document.getElementById('chart-bar-protected-diversity'), {
             type: 'bar',
