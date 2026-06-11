@@ -341,11 +341,11 @@
           title: 'Protected Bike Density (mi/sq mi)',
           format: v => v.toFixed(1)
         },
-        pct_white: {
-          colors: ['#1e1b4b', '#312e81', '#4338ca', '#6366f1', '#818cf8', '#a5b4fc', '#e0e7ff'],
-          breaks: [0, 30, 45, 60, 70, 80, 90],
-          labels: ['0%', '30%', '45%', '60%', '70%', '80%', '90%+'],
-          title: '% White Population',
+        pct_nonwhite: {
+          colors: ['#e0e7ff', '#a5b4fc', '#818cf8', '#6366f1', '#4338ca', '#312e81', '#1e1b4b'],
+          breaks: [0, 15, 25, 35, 45, 55, 65],
+          labels: ['0%', '15%', '25%', '35%', '45%', '55%', '65%+'],
+          title: 'Diversity (% Non-White)',
           format: v => v.toFixed(0) + '%'
         },
         income: {
