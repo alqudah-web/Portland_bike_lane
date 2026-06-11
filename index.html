@@ -57,7 +57,7 @@
       </div>
       <div class="stat-card">
         <div class="stat-card__value stat-card__value--purple" id="stat-corr-white">—</div>
-        <div class="stat-card__label">Density–% White Correlation</div>
+        <div class="stat-card__label">Density–Diversity Correlation</div>
       </div>
       <div class="stat-card">
         <div class="stat-card__value stat-card__value--rose" id="stat-no-bike">—</div>
@@ -86,7 +86,7 @@
         <button class="map-btn active" data-layer="density" id="btn-density">🚲 Bike Density</button>
         <button class="map-btn" data-layer="protected_density" id="btn-protected-density">🛡️ Protected Bike
           Density</button>
-        <button class="map-btn" data-layer="pct_white" id="btn-pct-white">👤 % White</button>
+        <button class="map-btn" data-layer="pct_nonwhite" id="btn-pct-white">👤 Diversity</button>
         <button class="map-btn" data-layer="income" id="btn-income">💰 Median Income</button>
         <button class="map-btn" data-layer="nocoverage" id="btn-nocoverage">🚫 No Coverage</button>
       </div>
@@ -377,7 +377,7 @@
         switch (layer) {
           case 'density': return props.bike_density;
           case 'protected_density': return props.protected_bike_density;
-          case 'pct_white': return props.pct_white;
+          case 'pct_nonwhite': return props.pct_nonwhite;
           case 'income': return props.median_income;
           case 'nocoverage': return props.nocoverage;
           default: return null;
@@ -515,7 +515,7 @@
           <div class="popup-row"><span class="popup-label">Tract Area</span><span class="popup-value">${formatArea(p.area_sqmi)}</span></div>
           <hr style="border:none; border-top:1px solid rgba(255,255,255,0.1); margin:6px 0;">
           <div class="popup-row"><span class="popup-label">Population</span><span class="popup-value">${formatNumber(p.total_pop)}</span></div>
-          <div class="popup-row"><span class="popup-label">% White</span><span class="popup-value">${formatPercent(p.pct_white)}</span></div>
+          <div class="popup-row"><span class="popup-label">% Non-White</span><span class="popup-value">${formatPercent(p.pct_nonwhite)}</span></div>
           <div class="popup-row"><span class="popup-label">% Black</span><span class="popup-value">${formatPercent(p.pct_black)}</span></div>
           <div class="popup-row"><span class="popup-label">% Asian</span><span class="popup-value">${formatPercent(p.pct_asian)}</span></div>
           <div class="popup-row"><span class="popup-label">% Hispanic</span><span class="popup-value">${formatPercent(p.pct_hispanic)}</span></div>
