@@ -2,45 +2,45 @@
   "total_tracts": 169,
   "tracts_with_bikes": 164,
   "tracts_without_bikes": 3,
-  "total_active_miles": 458.8,
-  "total_protected_miles": 119.0,
-  "mean_density": 4.79,
-  "mean_protected_density": 0.98,
+  "total_active_miles": 460.6,
+  "total_protected_miles": 120.6,
+  "mean_density": 4.81,
+  "mean_protected_density": 1.0,
   "max_density": 21.24,
   "max_protected_density": 9.62,
-  "corr_diversity": 0.02,
+  "corr_diversity": 0.022,
   "corr_diversity_protected": 0.162,
-  "corr_income": -0.355,
-  "corr_income_protected": -0.302,
+  "corr_income": -0.352,
+  "corr_income_protected": -0.292,
   "mean_pct_white": 69.2,
   "mean_median_income": 97553.0,
   "county_median_income": 88766,
   "income_quintiles": {
     "Q1 (Lowest)": 6.43,
-    "Q2": 5.27,
+    "Q2": 5.28,
     "Q3": 4.62,
-    "Q4": 4.59,
-    "Q5 (Highest)": 3.45
+    "Q4": 4.68,
+    "Q5 (Highest)": 3.46
+  },
+  "diversity_quintiles": {
+    "Q1 (Lowest)": 3.95,
+    "Q2": 4.95,
+    "Q3": 5.44,
+    "Q4": 5.77,
+    "Q5 (Highest)": 4.44
   },
   "income_quintiles_protected": {
     "Q1 (Lowest)": 1.94,
-    "Q2": 0.88,
+    "Q2": 0.89,
     "Q3": 0.88,
-    "Q4": 0.91,
+    "Q4": 0.98,
     "Q5 (Highest)": 0.37
   },
-  "diversity_quintiles": {
-    "Q1 (Lowest)": 4.43,
-    "Q2": 5.68,
-    "Q3": 5.44,
-    "Q4": 4.85,
-    "Q5 (Highest)": 3.96
-  },
   "diversity_quintiles_protected": {
-    "Q1 (Lowest)": 1.26,
-    "Q2": 1.36,
+    "Q1 (Lowest)": 0.46,
+    "Q2": 0.67,
     "Q3": 1.26,
-    "Q4": 0.65,
-    "Q5 (Highest)": 0.47
+    "Q4": 1.42,
+    "Q5 (Highest)": 1.27
   }
 }
